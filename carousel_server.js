@@ -44,7 +44,7 @@ async function runCarouselPipeline() {
     console.log('\n📤 Step 4: Uploading & Publishing Carousel to Instagram...');
     const caption = `💡 ${topic}\n\nSwipe left to learn the step-by-step strategy! Save this post for later.\n\nComment 'WEALTH' to get our free side hustle template!\n\n#wealth #sidehustle #business #success #ai`;
     
-    await uploadCarouselToInstagram(slidePaths, caption);
+    await uploadCarouselToInstagram(slidePaths, caption, carouselData.slides);
 
     console.log('\n🎉 Carousel Pipeline Complete!');
     process.exit(0);

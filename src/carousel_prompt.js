@@ -30,14 +30,16 @@ JSON Structure required:
       "type": "cover",
       "tagline": "AI WEALTH HACK",
       "title": "Punchy 6-8 Word Hook Title Here",
-      "subtitle": "Compelling Subtitle That Forces Viewers To Swipe Left"
+      "subtitle": "Compelling Subtitle That Forces Viewers To Swipe Left",
+      "alt_text": "High-contrast infographic cover slide about AI tools, side hustles, and wealth creation strategies for 2026"
     },
     {
       "slide_number": 2,
       "type": "content",
       "step_number": "01",
       "title": "Catchy Step or Tool Name",
-      "description": "1-2 sentences of ultra-actionable, high-value advice or explanation."
+      "description": "1-2 sentences of ultra-actionable, high-value advice or explanation.",
+      "alt_text": "Educational slide explaining step 1 of AI business automation and online income"
     },
     {
       "slide_number": 3,

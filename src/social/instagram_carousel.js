@@ -6,7 +6,7 @@ import { uploadToTmpFiles } from '../tmpupload.js';
  * @param {string} caption - Post caption text
  * @returns {Promise<object>} Result from Instagram Graph API publish endpoint
  */
-export async function uploadCarouselToInstagram(localImagePaths, caption) {
+export async function uploadCarouselToInstagram(localImagePaths, caption, slidesData = []) {
   const igUserId = process.env.INSTAGRAM_USER_ID;
   const token = process.env.INSTAGRAM_ACCESS_TOKEN;
 
@@ -25,17 +25,21 @@ export async function uploadCarouselToInstagram(localImagePaths, caption) {
   publicUrls.forEach((url, i) => console.log(`   Slide ${i + 1}: ${url}`));
 
   // Step 2: Create sub-containers for each image item
-  console.log('\n📤 Step 2: Creating Instagram Carousel Sub-Containers...');
+  console.log('\n📤 Step 2: Creating Instagram Carousel Sub-Containers with Alt-Text SEO...');
   const itemContainerIds = [];
 
   for (let i = 0; i < publicUrls.length; i++) {
     const url = publicUrls[i];
+    const slideInfo = slidesData[i] || {};
+    const altText = slideInfo.alt_text || `AI wealth and side hustle guide slide ${i + 1} by @hustler.maxing`;
+
     const res = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         is_carousel_item: true,
         image_url: url,
+        alt_text: altText,
         access_token: token
       })
     });
