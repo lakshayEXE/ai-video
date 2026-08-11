@@ -25,6 +25,11 @@ async function waitForApproval(script) {
   let currentScript = script;
   let resolved = false;
 
+  if (!bot || !chatId || process.env.AUTO_APPROVE === 'true') {
+    console.log('⏩ Auto-approving script (AUTO_APPROVE=true or headless mode)...');
+    return Promise.resolve(script);
+  }
+
   return new Promise((resolve) => {
     // 5-Minute Auto-Approve Timeout
     let timeoutId = setTimeout(async () => {
