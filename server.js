@@ -93,6 +93,13 @@ async function waitForApproval(script) {
  */
 async function runPipeline() {
   try {
+    // Organic Random Delay (1-10 mins) when running in GitHub Actions to randomize timestamps
+    if (process.env.GITHUB_ACTIONS) {
+      const randomMinutes = Math.floor(Math.random() * 9) + 1;
+      console.log(`⏱️ Running on GitHub Actions: Adding organic delay of ${randomMinutes} minutes...`);
+      await new Promise((resolve) => setTimeout(resolve, randomMinutes * 60 * 1000));
+    }
+
     if (bot) bot.launch(); 
 
     console.log('\n📰 Step 1: Fetching latest news from RSS feed...');
