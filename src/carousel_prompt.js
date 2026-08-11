@@ -9,7 +9,7 @@ function getAiClient() {
 }
 
 /**
- * Generates a structured 5-slide agency-grade educational carousel JSON for Instagram.
+ * Generates a structured 5 to 7 slide agency-grade educational carousel JSON for Instagram.
  * @param {object|string} newsTopicInput - News topic object or string
  * @returns {Promise<object>} Structured agency-grade carousel JSON object
  */
@@ -25,11 +25,17 @@ TITLE: "${topicTitle}"
 CATEGORY: "${topicCategory}"
 CONTEXT: "${topicSnippet}"
 
-Turn it into an agency-grade, 5-slide educational Instagram Carousel masterclass. Readers MUST learn actionable insights, frameworks, or case study takeaways that compel them to save and follow.
+Turn it into an agency-grade educational Instagram Carousel masterclass. Readers MUST learn actionable insights, frameworks, or case study takeaways that compel them to save and follow.
 
-CRITICAL REQUIREMENT: Return ONLY raw valid JSON (no markdown formatting, no code fences, no leading/trailing text).
+DYNAMIC SLIDE COUNT RULE:
+Evaluate the depth of this topic:
+- If it is a concise news headline or quick tool tip: Generate exactly 5 slides.
+- If it is a deep framework, multi-step case study, or resource list: Generate 6 or 7 slides (maximum 7 slides).
+Zero fluff allowed. Every slide must deliver high signal and high value.
 
-Required JSON Structure:
+CRITICAL REQUIREMENT: Return ONLY raw valid JSON (no markdown block formatting, no code fences, no leading/trailing text).
+
+Required JSON Structure Example (adapt slide array length between 5 and 7 items dynamically):
 {
   "topic": "${topicTitle.replace(/"/g, '\\"')}",
   "category": "${topicCategory}",
@@ -59,7 +65,7 @@ Required JSON Structure:
       "slide_number": 3,
       "type": "content",
       "step_number": "02",
-      "headline": "The 3-Step Strategy Framework",
+      "headline": "The Core Strategy Framework",
       "bullets": [
         "First Principle: Identify non-linear growth levers.",
         "Execution: Automate 80% of repetitive operational tasks.",
@@ -72,8 +78,8 @@ Required JSON Structure:
       "slide_number": 4,
       "type": "content",
       "step_number": "03",
-      "headline": "How You Can Apply This Today",
-      "description": "2 sentences explaining exactly how the reader can use this concept to get results.",
+      "headline": "Execution Playbook & Case Study",
+      "description": "Concrete 2-sentence guide on how to implement this strategy step-by-step.",
       "key_takeaway": "Pro Insight: Start small and compound daily.",
       "image_prompt": "Minimalist dark dashboard interface illustration"
     },
@@ -103,10 +109,17 @@ Required JSON Structure:
 
   try {
     const data = JSON.parse(rawText);
+    if (data.slides && Array.isArray(data.slides)) {
+      // Re-index slide numbers sequentially to ensure strict consistency
+      data.slides.forEach((slide, idx) => {
+        slide.slide_number = idx + 1;
+      });
+    }
     return data;
   } catch (err) {
     console.error('❌ Failed to parse Gemini Carousel JSON:', rawText);
     throw new Error(`Invalid Carousel JSON generated: ${err.message}`);
   }
 }
+
 
