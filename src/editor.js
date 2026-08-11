@@ -122,8 +122,8 @@ export async function processFinalVideo(rawVideoPaths, audioPath, scriptText, ou
   const voiceIndex = numClips;
   filterComplex += `${concatInputs}concat=n=${numClips}:v=1:a=0[concat_out]; `;
   
-  // Large, bold, highly-visible yellow/white captions in lower-middle zone (Alignment=2, MarginV=420)
-  const subtitleStyle = `FontName=Arial,FontSize=48,PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=1,Outline=3,Shadow=2,Bold=-1,Alignment=2,MarginV=420`;
+  // Bold, highly-visible yellow captions in lower-middle zone (Alignment=2, MarginV=40)
+  const subtitleStyle = `FontName=Arial,FontSize=22,PrimaryColour=&H00FFFF,OutlineColour=&H000000,BorderStyle=1,Outline=3,Shadow=2,Bold=1,Alignment=2,MarginV=40`;
   filterComplex += `[concat_out]subtitles='${escapedSrtPath}':force_style='${subtitleStyle}'[final_v]; `;
 
   if (hasBgMusic) {

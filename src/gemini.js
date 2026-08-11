@@ -24,23 +24,24 @@ export async function generateScript(newsTopicInput) {
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
-    contents: `You are an elite, top 1% viral content creator and confident young millionaire founder running (@hustle.maxxing).
-Your persona is intense, authoritative, fast-paced, and highly captivating.
-Your goal is to spin this research topic into a viral 45-second vertical video script (Instagram Reels / TikTok):
+    contents: `You are an elite, top 1% tech & business strategist running (@hustle.maxxing).
+Your style is calm, razor-sharp, authoritative, and direct. You get straight to the point with zero filler or hype delays.
+
+Spin this research topic into a punchy 40-second vertical video script (Instagram Reels / TikTok):
 
 TOPIC TITLE: "${topicTitle}"
 CATEGORY: "${topicCategory}"
 CONTEXT: "${topicSnippet}"
 
-CRITICAL SCRIPT STRUCTURE (35 to 50 seconds spoken aloud, approx 90-120 words):
-1. THE HOOK (First 3 seconds): Must be an intense, high-stakes curiosity hook tailored specifically to "${topicTitle}". (e.g., "While 99% of people are ignoring this, top founders are using ${topicTitle} to build $5,000/week automated systems...", or "Stop scrolling if you want to understand why ${topicTitle} is making traditional methods obsolete..."). Make it bold and high-leverage!
-2. THE PIVOT: Connect the hook to the exact problem, explaining why this development is a massive shift.
-3. THE OPEN-LOOP BLUEPRINT: Give 2 or 3 fast-paced, highly actionable steps. Insert a psychological open-loop (e.g. "Step 2 is where 90% of people fail and lose thousands...").
-4. THE CTA: End abruptly with high-converting engagement bait (e.g. "Save this video before it gets buried, and comment 'GROWTH' for the complete breakdown.")
+CRITICAL SCRIPT STRUCTURE (35 to 45 seconds spoken aloud, approx 85-110 words):
+1. THE DIRECT POINT (First 2 seconds): Immediately state EXACTLY what this reel is about in one razor-sharp, high-signal sentence! (e.g., "${topicTitle} is changing how we build software, and here is what you need to know...", or "If you are following traditional methods, ${topicTitle} just made them obsolete.").
+2. THE CORE BREAKDOWN: Give 2 or 3 clear, high-value steps or insights that explain why this matters right now.
+3. THE ACTIONABLE TAKEAWAY: Tell the audience the exact leverage point (e.g. "Step 2 is the exact step most founders skip...").
+4. THE QUICK CTA: End cleanly (e.g. "Save this reel for your next build, and comment 'BLUEPRINT' for the full guide.")
 
 RULES:
-- Tone: Confident, intense, high-energy young millionaire / high-performance founder persona.
-- Grounding: The hook and steps MUST match the actual topic ("${topicTitle}"). Do NOT use static copy-paste teenager templates.
+- Tone: Calm, authoritative, articulate executive / high-performance tech founder.
+- Grounding: Must get to the core of "${topicTitle}" IMMEDIATELY in sentence 1.
 - NO stage directions, NO speaker labels, NO emojis in the spoken script text. Pure spoken words ONLY.
 - AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 relevant b-roll queries tailored to this topic:
 [SEARCH: <query 1>, <query 2>, <query 3>]`
@@ -112,12 +113,12 @@ export async function generateAudio(scriptText, outputPath, voiceName = 'Puck') 
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  console.log(`🎙️ Synthesizing Gemini Voiceover (Voice: ${voiceName} - rich, young millionaire persona)...`);
+  console.log(`🎙️ Synthesizing Gemini Voiceover (Voice: ${voiceName} - calm, authoritative executive persona)...`);
 
   try {
     const audioResponse = await ai.models.generateContent({
       model: 'gemini-3.1-flash-tts-preview',
-      contents: `Read the following script in the voice of a rich, confident, young 20-something millionaire giving intense advice:\n\n${scriptText}`,
+      contents: `Read the following script in a calm, composed, articulate, and authoritative voice of an elite tech executive giving high-signal advice with clear pacing:\n\n${scriptText}`,
       config: {
         responseModalities: ['AUDIO'],
         speechConfig: {
