@@ -29,7 +29,7 @@ export async function downloadMultiplePexelsVideos(query, count, outputDir) {
           params: {
             query: q,
             orientation: 'portrait',
-            size: 'medium',
+            size: 'large',
             per_page: 20
           }
         });
@@ -46,7 +46,7 @@ export async function downloadMultiplePexelsVideos(query, count, outputDir) {
     if (allVideos.length === 0) {
       const searchRes = await axios.get('https://api.pexels.com/videos/search', {
         headers: { Authorization: apiKey },
-        params: { query: 'luxury wealth', orientation: 'portrait', size: 'medium', per_page: count }
+        params: { query: 'luxury wealth', orientation: 'portrait', size: 'large', per_page: count }
       });
       allVideos = searchRes.data.videos.slice(0, count);
     }

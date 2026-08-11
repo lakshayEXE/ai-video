@@ -23,9 +23,13 @@ export function generateSRT(scriptText, totalDurationSeconds = 40) {
   let index = 1;
   let currentTime = 0;
 
+  // Add Visual Hook Banner for first 3.5 seconds
+  const hookWords = words.slice(0, 7).join(' ').toUpperCase();
+  srtContent += `${index}\n00:00:00,000 --> 00:00:03,500\n${hookWords}\n\n`;
+  index++;
+
   let i = 0;
   while (i < words.length) {
-    // Randomly choose 1 or 2 words per chunk for dynamic pacing
     const chunkLength = Math.random() > 0.5 ? 2 : 1;
     const chunkWords = words.slice(i, i + chunkLength);
     const chunkText = chunkWords.join(' ');
@@ -58,7 +62,7 @@ async function getAudioDuration(audioPath) {
 }
 
 /**
- * Merges raw avatar video with audio, crops to 9:16 vertical, and burns styled subtitles.
+ * Merges raw B-Roll clips with audio, crops to 9:16 vertical, and burns styled subtitles with HD bitrate settings.
  * @param {string[]} rawVideoPaths - Input raw video file paths
  * @param {string} audioPath - Input audio file path
  * @param {string} scriptText - Script text for SRT creation
@@ -71,18 +75,15 @@ export async function processFinalVideo(rawVideoPaths, audioPath, scriptText, ou
     fs.mkdirSync(tmpDir, { recursive: true });
   }
 
-  // Fallback to array if single string passed
   if (!Array.isArray(rawVideoPaths)) {
     rawVideoPaths = [rawVideoPaths];
   }
 
   const srtPath = path.join(tmpDir, 'captions.srt');
 
-  // Determine exact audio duration for perfect caption sync
   const exactDuration = await getAudioDuration(audioPath);
   console.log(`⏱️ Audio duration calculated as ${exactDuration.toFixed(2)} seconds. Syncing captions...`);
 
-  // Generate mapped SRT captions (1-2 words per line)
   const srtData = generateSRT(scriptText, exactDuration);
   fs.writeFileSync(srtPath, srtData);
   const escapedSrtPath = srtPath.replace(/\\/g, '/').replace(/:/g, '\\:');
@@ -92,30 +93,29 @@ export async function processFinalVideo(rawVideoPaths, audioPath, scriptText, ou
   for (const p of rawVideoPaths) {
     ffmpegCmd += `-i "${p}" `;
   }
-  ffmpegCmd += `-i "${audioPath}" `; // The audio is the last input (index N)
+  ffmpegCmd += `-i "${audioPath}" `;
 
-  // Build Complex Filter for Fast Cuts (Trim to 7 seconds each = 42 seconds total)
+  // Build Complex Filter for Fast Cuts (Trim to 3 seconds per clip for dynamic engagement)
   let filterComplex = '-filter_complex "';
   let concatInputs = '';
   
   for (let i = 0; i < rawVideoPaths.length; i++) {
-    // Crop/Scale to exactly 1080x1920, trim to 7 seconds for fast cuts, fix SAR and timestamps
-    filterComplex += `[${i}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,trim=duration=7,setpts=PTS-STARTPTS[v${i}]; `;
+    filterComplex += `[${i}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,trim=duration=3,setpts=PTS-STARTPTS[v${i}]; `;
     concatInputs += `[v${i}]`;
   }
   
   const audioIndex = rawVideoPaths.length;
   filterComplex += `${concatInputs}concat=n=${rawVideoPaths.length}:v=1:a=0[concat_out]; `;
   
-  // Apply dark overlay and Hormozi-style captions (Border=4, BackColour)
-  const subtitleStyle = `FontSize=28,PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=4,BackColour=&H80000000,Bold=-1,MarginV=50`;
-  filterComplex += `[concat_out]eq=brightness=-0.3,subtitles='${escapedSrtPath}':force_style='${subtitleStyle}'[final_v]" `;
+  // High-contrast subtitle style with bold captions & no dimming
+  const subtitleStyle = `FontSize=28,PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=4,BackColour=&H80000000,Bold=-1,MarginV=60`;
+  filterComplex += `[concat_out]subtitles='${escapedSrtPath}':force_style='${subtitleStyle}'[final_v]" `;
 
-  // Map final video and original audio, end exactly when audio ends
-  ffmpegCmd += `${filterComplex} -map "[final_v]" -map ${audioIndex}:a -c:v libx264 -c:a aac -shortest "${outputPath}"`;
+  // Map final video and original audio with HD high-bitrate encoding (-crf 18, 8M bitrate)
+  ffmpegCmd += `${filterComplex} -map "[final_v]" -map ${audioIndex}:a -c:v libx264 -preset fast -crf 18 -b:v 8M -c:a aac -b:a 192k -shortest "${outputPath}"`;
 
-  console.log('🎬 Executing FFmpeg video stitching & dynamic subtitle burn...');
+  console.log('🎬 Executing High-Bitrate FFmpeg video stitching & dynamic caption burn...');
   await execPromise(ffmpegCmd);
-  console.log(`✅ Final video rendered -> ${outputPath}`);
+  console.log(`✅ HD Final video rendered -> ${outputPath}`);
   return outputPath;
 }
