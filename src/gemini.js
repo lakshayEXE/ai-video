@@ -12,29 +12,38 @@ function getAiClient() {
 }
 
 /**
- * Drafts an initial punchy 45-second vertical script for a cute 22yo female tech influencer.
- * @param {string} newsTopic - News headline or topic summary
+ * Drafts an initial punchy 45-second vertical script for a tech/business influencer.
+ * @param {object|string} newsTopicInput - News headline object or topic summary
  * @returns {Promise<string>}
  */
-export async function generateScript(newsTopic) {
+export async function generateScript(newsTopicInput) {
   const ai = getAiClient();
-  const response = await ai.models.generateContent({
-    model: 'gemini-flash-latest',
-    contents: `You are an elite, top 1% TikTok/Reels copywriter who specializes in highly viral, dark-psychology "Wealth & Side Hustle" faceless videos.
-Your goal is to spin this recent news topic into a secret money-making opportunity or intense wealth insight: "${newsTopic}".
+  const topicTitle = typeof newsTopicInput === 'object' ? newsTopicInput.title : newsTopicInput;
+  const topicCategory = (typeof newsTopicInput === 'object' && newsTopicInput.category) ? newsTopicInput.category : 'BUSINESS & TECH';
+  const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
 
-CRITICAL SCRIPT STRUCTURE (Target length: EXACTLY 35 to 50 seconds of spoken text, approx 90-120 words):
-1. THE HOOK (First 3 seconds): MUST be controversial, highly specific, and include a specific dollar amount or timeframe. (e.g., "While everyone is panicking about the economy, 19-year-olds are using this hidden Google tool to clear $3,400 a week...", or "If you have $0 in your bank account, stop scrolling and listen to this exact 14-day strategy...")
-2. THE PIVOT: Connect the hook seamlessly to the news topic, framing it as a massive hidden opportunity that 99% of people are missing.
-3. THE OPEN-LOOP BLUEPRINT: Give 2 or 3 fast-paced, highly actionable steps. Insert a psychological open-loop in the middle (e.g. "Step 2 is what 90% of people get wrong, and it costs them thousands...").
-4. THE CTA (Call To Action): End abruptly with engagement bait (e.g. "Save this video before it gets taken down, and comment 'WEALTH' for the step-by-step blueprint.")
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: `You are an elite, top 1% viral content creator and confident young millionaire founder running (@hustle.maxxing).
+Your persona is intense, authoritative, fast-paced, and highly captivating.
+Your goal is to spin this research topic into a viral 45-second vertical video script (Instagram Reels / TikTok):
+
+TOPIC TITLE: "${topicTitle}"
+CATEGORY: "${topicCategory}"
+CONTEXT: "${topicSnippet}"
+
+CRITICAL SCRIPT STRUCTURE (35 to 50 seconds spoken aloud, approx 90-120 words):
+1. THE HOOK (First 3 seconds): Must be an intense, high-stakes curiosity hook tailored specifically to "${topicTitle}". (e.g., "While 99% of people are ignoring this, top founders are using ${topicTitle} to build $5,000/week automated systems...", or "Stop scrolling if you want to understand why ${topicTitle} is making traditional methods obsolete..."). Make it bold and high-leverage!
+2. THE PIVOT: Connect the hook to the exact problem, explaining why this development is a massive shift.
+3. THE OPEN-LOOP BLUEPRINT: Give 2 or 3 fast-paced, highly actionable steps. Insert a psychological open-loop (e.g. "Step 2 is where 90% of people fail and lose thousands...").
+4. THE CTA: End abruptly with high-converting engagement bait (e.g. "Save this video before it gets buried, and comment 'GROWTH' for the complete breakdown.")
 
 RULES:
-- Tone: Intense, authoritative, fast-paced, confident young millionaire persona.
-- NO brackets, NO stage directions, NO emojis in the spoken text. Spoken words ONLY.
-- AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one tag with 3 comma-separated visual search terms:
-[SEARCH: <query 1>, <query 2>, <query 3>]
-Example: [SEARCH: luxury supercar, skyscraper night, trading charts]`
+- Tone: Confident, intense, high-energy young millionaire / high-performance founder persona.
+- Grounding: The hook and steps MUST match the actual topic ("${topicTitle}"). Do NOT use static copy-paste teenager templates.
+- NO stage directions, NO speaker labels, NO emojis in the spoken script text. Pure spoken words ONLY.
+- AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 relevant b-roll queries tailored to this topic:
+[SEARCH: <query 1>, <query 2>, <query 3>]`
   });
   return response.text.trim();
 }
@@ -48,8 +57,8 @@ Example: [SEARCH: luxury supercar, skyscraper night, trading charts]`
 export async function reviseScript(currentScript, userFeedback) {
   const ai = getAiClient();
   const response = await ai.models.generateContent({
-    model: 'gemini-flash-latest',
-    contents: `Current Script:\n"${currentScript}"\n\nUser Revision Request:\n"${userFeedback}"\n\nThink carefully about the feedback and rewrite the script maintaining the intense, motivational "Wealth & Side Hustle" faceless theme page persona. Output spoken words exactly 65 to 75 seconds long.\n\nAT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one tag like this: [SEARCH: <1-2 word query for highly relevant aesthetic b-roll>] (e.g. if script is about money use [SEARCH: luxury cars]). Ensure the visual matches the topic!`
+    model: 'gemini-2.5-flash',
+    contents: `Current Script:\n"${currentScript}"\n\nUser Revision Request:\n"${userFeedback}"\n\nThink carefully about the feedback and rewrite the script maintaining an authoritative, high-value tech & business influencer tone. Output spoken words exactly 45 seconds long.\n\nAT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one tag: [SEARCH: <query 1>, <query 2>, <query 3>]. Ensure the visual search query matches the topic!`
   });
   return response.text.trim();
 }

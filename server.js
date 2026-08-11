@@ -108,11 +108,11 @@ async function runPipeline() {
     if (bot) bot.launch(); 
 
     console.log('\n📰 Step 1: Fetching latest news from RSS feed...');
-    const news = await getLatestNewsTopic();
+    const news = await getLatestNewsTopic('mixed');
     const topic = news.title;
     
     console.log(`✍️ Step 2: Drafting script via Gemini 2.5 Flash for topic: "${topic}"...`);
-    const initialScript = await generateScript(topic);
+    const initialScript = await generateScript(news);
 
     if (bot && chatId) {
       await bot.telegram.sendMessage(
