@@ -3,7 +3,7 @@ import fs from 'fs';
 import axios from 'axios';
 
 /**
- * Uploads a local file to catbox.moe (free, direct file hosting).
+ * Uploads a local file to uguu.se (free, direct file hosting).
  * Returns a direct public URL to the raw .mp4 file that Instagram API can download.
  * @param {string} filePath - Absolute path to local video file
  * @returns {Promise<string>} Direct public URL to the video
@@ -13,31 +13,27 @@ export async function uploadToTmpFiles(filePath) {
     throw new Error(`File not found: ${filePath}`);
   }
 
-  console.log('☁️ Uploading video to catbox.moe for public Instagram access...');
+  console.log('☁️ Uploading video to uguu.se for public Instagram access...');
   const form = new FormData();
-  form.append('reqtype', 'fileupload');
-  form.append('fileToUpload', fs.createReadStream(filePath));
+  form.append('files[]', fs.createReadStream(filePath));
 
   try {
-    const response = await axios.post('https://catbox.moe/user/api.php', form, {
+    const response = await axios.post('https://uguu.se/upload.php', form, {
       headers: {
-        ...form.getHeaders(),
-        // Spoof a real browser to bypass Catbox's 412 anti-bot block
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      },
-      responseType: 'text'
+        ...form.getHeaders()
+      }
     });
 
-    const directUrl = response.data.trim();
-    
-    if (directUrl.startsWith('https://')) {
+    if (response.data && response.data.success) {
+      const directUrl = response.data.files[0].url;
       console.log(`✅ Upload complete! Direct URL: ${directUrl}`);
       return directUrl;
     } else {
-      throw new Error(`Catbox upload failed: ${directUrl}`);
+      throw new Error(`uguu.se upload failed: ${JSON.stringify(response.data)}`);
     }
   } catch (error) {
     console.error('❌ Failed to upload video to temporary host:', error.message);
     throw error;
   }
 }
+
