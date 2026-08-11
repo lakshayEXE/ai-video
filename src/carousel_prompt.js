@@ -9,70 +9,96 @@ function getAiClient() {
 }
 
 /**
- * Generates a structured 5-slide educational carousel JSON for Instagram.
- * @param {string} newsTopic - News headline or wealth topic summary
- * @returns {Promise<object>} Structured carousel JSON object
+ * Generates a structured 5-slide agency-grade educational carousel JSON for Instagram.
+ * @param {object|string} newsTopicInput - News topic object or string
+ * @returns {Promise<object>} Structured agency-grade carousel JSON object
  */
-export async function generateCarouselContent(newsTopic) {
+export async function generateCarouselContent(newsTopicInput) {
   const ai = getAiClient();
-  
-  const prompt = `You are a top 1% Instagram Carousel copywriter for a high-end luxury wealth & AI page (@hustler.maxing).
-Your task is to take this topic: "${newsTopic}" and turn it into a viral, high-converting 5-slide Instagram Carousel.
+  const topicTitle = typeof newsTopicInput === 'object' ? newsTopicInput.title : newsTopicInput;
+  const topicCategory = (typeof newsTopicInput === 'object' && newsTopicInput.category) ? newsTopicInput.category : 'BUSINESS CASE STUDY';
+  const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
 
-CRITICAL REQUIREMENT: Return ONLY raw valid JSON (no markdown block formatting, no code fences, no extra text).
+  const prompt = `You are the Senior Editorial Director for a top-tier media brand (like Visual Capitalist or Morning Brew) running (@hustler.maxing).
+Your task is to take this research topic:
+TITLE: "${topicTitle}"
+CATEGORY: "${topicCategory}"
+CONTEXT: "${topicSnippet}"
 
-JSON Structure required:
+Turn it into an agency-grade, 5-slide educational Instagram Carousel masterclass. Readers MUST learn actionable insights, frameworks, or case study takeaways that compel them to save and follow.
+
+CRITICAL REQUIREMENT: Return ONLY raw valid JSON (no markdown formatting, no code fences, no leading/trailing text).
+
+Required JSON Structure:
 {
-  "topic": "${newsTopic}",
+  "topic": "${topicTitle.replace(/"/g, '\\"')}",
+  "category": "${topicCategory}",
+  "read_time": "2 MIN READ",
   "slides": [
     {
       "slide_number": 1,
       "type": "cover",
-      "tagline": "AI WEALTH HACK",
-      "title": "Punchy 6-8 Word Hook Title Here",
-      "subtitle": "Compelling Subtitle That Forces Viewers To Swipe Left",
-      "alt_text": "High-contrast infographic cover slide about AI tools, side hustles, and wealth creation strategies for 2026"
+      "category": "${topicCategory}",
+      "title": "Punchy 6-8 Word Curiosity Title",
+      "subtitle": "Compelling Teaser Subtitle Explaining What Readers Will Learn",
+      "image_prompt": "Minimalist high-tech dark background with glowing emerald cyan abstract geometry",
+      "alt_text": "High-contrast editorial cover slide about ${topicTitle.replace(/"/g, '\\"')}"
     },
     {
       "slide_number": 2,
       "type": "content",
       "step_number": "01",
-      "title": "Catchy Step or Tool Name",
-      "description": "1-2 sentences of ultra-actionable, high-value advice or explanation.",
-      "alt_text": "Educational slide explaining step 1 of AI business automation and online income"
+      "headline": "The Hidden Shift / Core Problem",
+      "stat_number": "+340%",
+      "stat_label": "Market Advantage",
+      "description": "1-2 sentences of ultra-sharp context explaining the core insight.",
+      "key_takeaway": "Key Lesson: Focus on leverage over effort.",
+      "image_prompt": "Dark glassmorphism metric visualization"
     },
     {
       "slide_number": 3,
       "type": "content",
       "step_number": "02",
-      "title": "Catchy Step or Tool Name",
-      "description": "1-2 sentences of ultra-actionable, high-value advice or explanation."
+      "headline": "The 3-Step Strategy Framework",
+      "bullets": [
+        "First Principle: Identify non-linear growth levers.",
+        "Execution: Automate 80% of repetitive operational tasks.",
+        "Optimization: Measure speed-to-market over perfection."
+      ],
+      "key_takeaway": "Actionable Tip: Audit your workflow for bottlenecks.",
+      "image_prompt": "Dark tech node architecture graphic"
     },
     {
       "slide_number": 4,
       "type": "content",
       "step_number": "03",
-      "title": "Catchy Step or Tool Name",
-      "description": "1-2 sentences of ultra-actionable, high-value advice or explanation."
+      "headline": "How You Can Apply This Today",
+      "description": "2 sentences explaining exactly how the reader can use this concept to get results.",
+      "key_takeaway": "Pro Insight: Start small and compound daily.",
+      "image_prompt": "Minimalist dark dashboard interface illustration"
     },
     {
       "slide_number": 5,
       "type": "cta",
-      "tagline": "FREE BLUEPRINT",
-      "title": "Want the Step-by-Step System?",
-      "subtitle": "Comment 'WEALTH' below and I'll send you the free guide."
+      "category": "FREE BLUEPRINT",
+      "title": "Want the Full Step-by-Step Guide?",
+      "subtitle": "Comment 'GROWTH' below and I'll send you our complete resource kit for free.",
+      "recap_bullets": [
+        "✓ Actionable case study breakdown",
+        "✓ Zero-friction implementation steps",
+        "✓ High-leverage growth frameworks"
+      ],
+      "alt_text": "Call to action slide for Instagram educational carousel"
     }
   ]
 }`;
 
   const response = await ai.models.generateContent({
-    model: 'gemini-flash-latest',
+    model: 'gemini-2.5-flash',
     contents: prompt
   });
 
   let rawText = response.text.trim();
-  
-  // Clean potential markdown formatting
   rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();
 
   try {
@@ -83,3 +109,4 @@ JSON Structure required:
     throw new Error(`Invalid Carousel JSON generated: ${err.message}`);
   }
 }
+
