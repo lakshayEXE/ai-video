@@ -37,7 +37,12 @@ const EVERGREEN_CONCEPT_POOL = [
   { title: "The Zero-To-One Framework: Building Products That People Love", category: "STARTUP STRATEGY" }
 ];
 
-const seenNewsTitles = new Set();
+// Boring B2B / corporate terms to filter out for high audience retention
+const BORING_KEYWORDS = [
+  'raises $', 'raised $', 'series a', 'series b', 'series c', 'seed round',
+  'quarterly earnings', 'q1 ', 'q2 ', 'q3 ', 'q4 ', 'appoints ', 'named ceo',
+  'b2b ', 'logistics ', 'compliance ', 'supply chain'
+];
 
 /**
  * Fetches a fresh top topic from RSS feeds or evergreen concept pool.
@@ -45,8 +50,8 @@ const seenNewsTitles = new Set();
  * @returns {Promise<{title: string, snippet: string, link: string, category: string, isEvergreen: boolean}>}
  */
 export async function getLatestNewsTopic(requestedMode = 'mixed') {
-  // If evergreen mode or random coin toss in mixed mode (30% chance for evergreen concept masterclass)
-  const useEvergreen = requestedMode === 'evergreen' || (requestedMode === 'mixed' && Math.random() < 0.35);
+  // If evergreen mode or random coin toss in mixed mode (40% chance for viral high-value concept masterclass)
+  const useEvergreen = requestedMode === 'evergreen' || (requestedMode === 'mixed' && Math.random() < 0.40);
 
   if (useEvergreen) {
     const concept = EVERGREEN_CONCEPT_POOL[Math.floor(Math.random() * EVERGREEN_CONCEPT_POOL.length)];
@@ -72,10 +77,22 @@ export async function getLatestNewsTopic(requestedMode = 'mixed') {
       throw new Error('No items in feed');
     }
 
-    const freshItems = feed.items.filter(item => item.title && !seenNewsTitles.has(item.title));
-    const candidateItems = freshItems.length > 0 ? freshItems : feed.items;
+    // Filter out seen titles AND boring B2B funding headlines
+    let candidateItems = feed.items.filter(item => {
+      if (!item.title) return false;
+      if (seenNewsTitles.has(item.title)) return false;
+      const lower = item.title.toLowerCase();
+      return !BORING_KEYWORDS.some(word => lower.includes(word));
+    });
 
-    const topCandidates = candidateItems.slice(0, 8);
+    if (candidateItems.length === 0) {
+      candidateItems = feed.items.filter(item => item.title && !seenNewsTitles.has(item.title));
+    }
+    if (candidateItems.length === 0) {
+      candidateItems = feed.items;
+    }
+
+    const topCandidates = candidateItems.slice(0, 5);
     const selectedItem = topCandidates[Math.floor(Math.random() * topCandidates.length)];
 
     seenNewsTitles.add(selectedItem.title);
