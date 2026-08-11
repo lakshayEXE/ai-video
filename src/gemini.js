@@ -24,26 +24,50 @@ export async function generateScript(newsTopicInput) {
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash',
-    contents: `You are an elite, top 1% tech & business strategist running (@hustle.maxxing).
-Your style is calm, razor-sharp, authoritative, and direct. You get straight to the point with zero filler or hype delays.
+    contents: `You are an elite, world-class media director and script architect for (@hustle.maxxing).
 
-Spin this research topic into a punchy 40-second vertical video script (Instagram Reels / TikTok):
+Your job is to analyze this topic and cook ONE PURE, MASTERFULLY TAILORED 40-second vertical video script (Reels/TikTok).
 
 TOPIC TITLE: "${topicTitle}"
 CATEGORY: "${topicCategory}"
 CONTEXT: "${topicSnippet}"
 
-CRITICAL SCRIPT STRUCTURE (35 to 45 seconds spoken aloud, approx 85-110 words):
-1. THE DIRECT POINT (First 2 seconds): Immediately state EXACTLY what this reel is about in one razor-sharp, high-signal sentence! (e.g., "${topicTitle} is changing how we build software, and here is what you need to know...", or "If you are following traditional methods, ${topicTitle} just made them obsolete.").
-2. THE CORE BREAKDOWN: Give 2 or 3 clear, high-value steps or insights that explain why this matters right now.
-3. THE ACTIONABLE TAKEAWAY: Tell the audience the exact leverage point (e.g. "Step 2 is the exact step most founders skip...").
-4. THE QUICK CTA: End cleanly (e.g. "Save this reel for your next build, and comment 'BLUEPRINT' for the full guide.")
+CRITICAL RULE - DO NOT MIX STYLES ("DON'T MIX SPICES IN THE SAME DISH"):
+Evaluate the topic and commit 100% to EXACTLY ONE of the 4 pure styles below. Do NOT combine hype with calm, or mix educational teaching with aggressive selling. Pick the SINGLE best style for this specific topic:
 
-RULES:
-- Tone: Calm, authoritative, articulate executive / high-performance tech founder.
-- Grounding: Must get to the core of "${topicTitle}" IMMEDIATELY in sentence 1.
-- NO stage directions, NO speaker labels, NO emojis in the spoken script text. Pure spoken words ONLY.
-- AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 relevant b-roll queries tailored to this topic:
+--- STYLE 1: PURE EDUCATIONAL MASTERCLASS ---
+(Use if the topic is a technical framework, developer tool, or system architecture)
+• Tone: Calm, articulate, high-signal technical lead / professor.
+• Hook: Direct technical paradigm shift (e.g., "${topicTitle} is changing how we build modern software...").
+• Body: 2 clear, step-by-step masterclass insights with zero fluff.
+
+--- STYLE 2: PURE HIGH-STAKES OPPORTUNITY & LEVERAGE ---
+(Use if the topic involves business models, AI monetization, or economic shifts)
+• Tone: Confident, sharp, high-performance founder.
+• Hook: High-stakes curiosity & economic leverage (e.g., "While 99% of people miss this shift, top teams are leveraging ${topicTitle} to build $5,000/week systems...").
+• Body: 3 fast-paced actionable steps with strong psychological open-loops.
+
+--- STYLE 3: PURE BREAKING NEWS & SECURITY ALERT ---
+(Use if the topic is an urgent flaw, corporate acquisition, or sudden release)
+• Tone: Razor-sharp, direct executive news teardown.
+• Hook: Immediate, zero-delay revelation (e.g., "${topicTitle} just dropped, and here is the exact breakdown...").
+• Body: Immediate root-cause analysis and actionable defense steps.
+
+--- STYLE 4: PURE AUTHORITY & TWEET QUOTE BREAKDOWN ---
+(Use if the topic features a quote or perspective from a famous CEO/founder like Sam Altman, Musk, Naval, etc.)
+• Tone: Reflective, authoritative, analytical.
+• Hook: Direct quote/tweet opening (e.g., "[Leader] just stated something that every founder needs to pay attention to...").
+• Body: Analyzing the deeper strategic implications.
+
+--- STYLE 5: TIMELESS PHILOSOPHY, HISTORICAL PARALLELS & PATTERN MATCHING ---
+(Use if the topic maps to a timeless principle from ancient philosophy, Bhagavad Gita, Stoicism, Sun Tzu, or famous tech history like 1995 Internet / Oppenheimer)
+• Tone: Visionary, cinematic, high-authority storyteller.
+• Hook: Connect a timeless quote or historical parallel to today's topic (e.g., "When Oppenheimer witnessed nuclear energy, he quoted the Gita: 'Now I am become Death.' Today, AI researchers at OpenAI face that exact same threshold with ${topicTitle}...").
+• Body: Draw a mind-blowing parallel between the timeless wisdom/history and what is happening right now with this topic.
+
+--- SCRIPT FORMAT REQUIREMENTS (35 to 45 seconds spoken aloud, 85 to 110 words) ---
+• Spoken words ONLY. NO stage directions, NO speaker names, NO emojis.
+• AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 relevant b-roll queries tailored to this topic:
 [SEARCH: <query 1>, <query 2>, <query 3>]`
   });
   return response.text.trim();
