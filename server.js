@@ -149,9 +149,23 @@ async function runPipeline() {
     console.log('🎙️ Generating voiceover audio...');
     await generateAudio(cleanScript, audioPath);
 
-    // Step 6: Pexels
+    // Step 6: B-Roll & AI Avatar Hook
     console.log(`🎥 Downloading 12 aesthetic B-Roll clips for "${searchQuery}"...`);
-    const rawVideoPaths = await downloadMultiplePexelsVideos(searchQuery, 12, tmpDir);
+    let rawVideoPaths = await downloadMultiplePexelsVideos(searchQuery, 12, tmpDir);
+
+    // If Colab GPU webhook is active, render AI Avatar Intro for the first 3 seconds
+    if (process.env.COLAB_WEBHOOK_URL) {
+      try {
+        console.log('👤 COLAB_WEBHOOK_URL detected! Generating 3s AI Talking Avatar intro...');
+        const avatarOut = path.join(tmpDir, 'avatar_intro.mp4');
+        const { renderAvatarFromColab } = await import('./src/avatar.js');
+        await renderAvatarFromColab(audioPath, avatarOut);
+        rawVideoPaths.unshift(avatarOut);
+        console.log('✅ AI Talking Avatar intro prepended to video timeline!');
+      } catch (err) {
+        console.warn('⚠️ Avatar rendering via Colab skipped/failed, using Pexels face hook:', err.message);
+      }
+    }
 
     // Step 7: Video Render
     console.log('🎬 Stitching clips & formatting vertical video...');

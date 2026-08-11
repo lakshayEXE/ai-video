@@ -15,6 +15,10 @@ export async function downloadMultiplePexelsVideos(query, count, outputDir) {
   }
 
   const subQueries = query.split(',').map(q => q.trim()).filter(Boolean);
+  // Ensure the video opens with a human face hook clip
+  if (!subQueries.some(q => q.includes('man') || q.includes('person') || q.includes('face'))) {
+    subQueries.unshift('young man business podcast');
+  }
   const perQueryCount = Math.max(1, Math.ceil(count / subQueries.length));
 
   console.log(`🔎 Searching Pexels for vertical videos across terms: ${JSON.stringify(subQueries)}...`);

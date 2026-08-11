@@ -95,6 +95,14 @@ export async function processFinalVideo(rawVideoPaths, audioPath, scriptText, ou
   }
   ffmpegCmd += `-i "${audioPath}" `;
 
+  // Check for optional background music track (assets/bg_music.mp3)
+  const bgMusicPath = path.resolve('./assets/bg_music.mp3');
+  const hasBgMusic = fs.existsSync(bgMusicPath);
+
+  if (hasBgMusic) {
+    ffmpegCmd += `-i "${bgMusicPath}" `;
+  }
+
   // Build Complex Filter for Fast Cuts (Trim to 3 seconds per clip for dynamic engagement)
   let filterComplex = '-filter_complex "';
   let concatInputs = '';
@@ -104,17 +112,23 @@ export async function processFinalVideo(rawVideoPaths, audioPath, scriptText, ou
     concatInputs += `[v${i}]`;
   }
   
-  const audioIndex = rawVideoPaths.length;
+  const voiceIndex = rawVideoPaths.length;
   filterComplex += `${concatInputs}concat=n=${rawVideoPaths.length}:v=1:a=0[concat_out]; `;
   
-  // High-contrast subtitle style with bold captions & no dimming
-  const subtitleStyle = `FontSize=28,PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=4,BackColour=&H80000000,Bold=-1,MarginV=60`;
-  filterComplex += `[concat_out]subtitles='${escapedSrtPath}':force_style='${subtitleStyle}'[final_v]" `;
+  // High-contrast subtitle style positioned in upper-middle zone (MarginV=280) to avoid Instagram UI overlap
+  const subtitleStyle = `FontSize=28,PrimaryColour=&H00FFFF&,OutlineColour=&H000000&,BorderStyle=4,BackColour=&H80000000,Bold=-1,Alignment=2,MarginV=280`;
+  filterComplex += `[concat_out]subtitles='${escapedSrtPath}':force_style='${subtitleStyle}'[final_v]; `;
 
-  // Map final video and original audio with HD high-bitrate encoding (-crf 18, 8M bitrate)
-  ffmpegCmd += `${filterComplex} -map "[final_v]" -map ${audioIndex}:a -c:v libx264 -preset fast -crf 18 -b:v 8M -c:a aac -b:a 192k -shortest "${outputPath}"`;
+  if (hasBgMusic) {
+    const bgIndex = rawVideoPaths.length + 1;
+    filterComplex += `[${voiceIndex}:a]volume=1.0[voice]; [${bgIndex}:a]volume=0.10[bg]; [voice][bg]amix=inputs=2:duration=first[final_a]" `;
+    ffmpegCmd += `${filterComplex} -map "[final_v]" -map "[final_a]" -c:v libx264 -preset fast -crf 18 -b:v 8M -c:a aac -b:a 192k -shortest "${outputPath}"`;
+  } else {
+    filterComplex = filterComplex.slice(0, -2) + '" ';
+    ffmpegCmd += `${filterComplex} -map "[final_v]" -map ${voiceIndex}:a -c:v libx264 -preset fast -crf 18 -b:v 8M -c:a aac -b:a 192k -shortest "${outputPath}"`;
+  }
 
-  console.log('🎬 Executing High-Bitrate FFmpeg video stitching & dynamic caption burn...');
+  console.log('🎬 Executing High-Bitrate FFmpeg video stitching with audio mixing & dynamic caption burn...');
   await execPromise(ffmpegCmd);
   console.log(`✅ HD Final video rendered -> ${outputPath}`);
   return outputPath;
