@@ -14,6 +14,14 @@ export async function uploadToInstagram(publicVideoUrl, caption) {
 
   console.log(`📤 Step 1: Creating Instagram Reels Container for URL: ${publicVideoUrl}`);
 
+  // Pick a random top US city location ID (New York, Los Angeles, Miami)
+  const usLocations = [
+    '212988691', // New York, New York
+    '213385484', // Los Angeles, California
+    '213004060'  // Miami, Florida
+  ];
+  const randomUsLocation = usLocations[Math.floor(Math.random() * usLocations.length)];
+
   // Step 1: Create Media Container
   const containerRes = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media`, {
     method: 'POST',
@@ -22,6 +30,7 @@ export async function uploadToInstagram(publicVideoUrl, caption) {
       media_type: 'REELS',
       video_url: publicVideoUrl,
       caption: caption,
+      location_id: randomUsLocation,
       access_token: token
     })
   });
