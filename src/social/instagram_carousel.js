@@ -30,8 +30,8 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
 
   for (let i = 0; i < publicUrls.length; i++) {
     const url = publicUrls[i];
-    const slideInfo = slidesData[i] || {};
-    const altText = slideInfo.alt_text || `AI wealth and side hustle guide slide ${i + 1} by @hustler.maxing`;
+    const handle = process.env.INSTAGRAM_HANDLE || '@hustle.maxxing';
+    const altText = slideInfo.alt_text || `AI wealth and side hustle guide slide ${i + 1} by ${handle}`;
 
     const res = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media`, {
       method: 'POST',

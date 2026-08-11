@@ -45,7 +45,7 @@ async function runCarouselPipeline() {
     } else {
       console.log('\n📤 Step 4: Uploading & Publishing Agency Carousel to Instagram...');
       const categoryTag = newsTopic.category || 'EXECUTIVE BREAKDOWN';
-      const caption = `💡 [${categoryTag}] ${newsTopic.title}\n\nSwipe left to read the full step-by-step masterclass! Save this post to reference when building.\n\nComment 'GROWTH' below and I'll send you our complete resource template for free!\n\n#hustlermaxing #business #growth #tech #startups #productivity #ai`;
+      const caption = `💡 [${categoryTag}] ${newsTopic.title}\n\nSwipe left to read the full step-by-step masterclass! Save this post to reference when building.\n\nComment 'GROWTH' below and I'll send you our complete resource template for free!\n\n#hustlemaxxing #business #growth #tech #startups #productivity #ai`;
       
       await uploadCarouselToInstagram(slidePaths, caption, carouselData.slides);
     }

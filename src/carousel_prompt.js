@@ -19,7 +19,7 @@ export async function generateCarouselContent(newsTopicInput) {
   const topicCategory = (typeof newsTopicInput === 'object' && newsTopicInput.category) ? newsTopicInput.category : 'BUSINESS CASE STUDY';
   const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
 
-  const prompt = `You are the Senior Editorial Director for a top-tier media brand (like Visual Capitalist or Morning Brew) running (@hustler.maxing).
+  const prompt = `You are the Senior Editorial Director for a top-tier media brand (like Visual Capitalist or Morning Brew) running (@hustle.maxxing).
 Your task is to take this research topic:
 TITLE: "${topicTitle}"
 CATEGORY: "${topicCategory}"

@@ -21,6 +21,7 @@ function renderSlideHtml(slideData, slideIndex, totalSlides = 5, bgAssetPath = n
 
   const categoryTag = slideData.category || 'EXECUTIVE BREAKDOWN';
   const readTime = slideData.read_time || '2 MIN READ';
+  const handle = process.env.INSTAGRAM_HANDLE || '@hustle.maxxing';
 
   // Build top progress bar segments
   let progressBarHtml = '<div class="progress-bar">';
@@ -410,7 +411,7 @@ function renderSlideHtml(slideData, slideIndex, totalSlides = 5, bgAssetPath = n
   <div class="footer-bar">
     <div class="brand-handle">
       <div class="brand-dot"></div>
-      @hustler.maxing
+      ${handle}
     </div>
     <div class="save-prompt">📌 Save For Later</div>
   </div>
