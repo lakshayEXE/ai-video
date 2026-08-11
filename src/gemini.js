@@ -65,6 +65,12 @@ Evaluate the topic and commit 100% to EXACTLY ONE of the 4 pure styles below. Do
 • Hook: Connect a timeless quote or historical parallel to today's topic (e.g., "When Oppenheimer witnessed nuclear energy, he quoted the Gita: 'Now I am become Death.' Today, AI researchers at OpenAI face that exact same threshold with ${topicTitle}...").
 • Body: Draw a mind-blowing parallel between the timeless wisdom/history and what is happening right now with this topic.
 
+--- ANTI-AI DETECTION & HUMAN VOICE PROTOCOL (CRITICAL) ---
+Make the script sound 100% human, authentic, and organic. Eliminate all robotic AI writing signatures:
+1. BANNED AI WORDS (NEVER USE): "delve", "tapestry", "realm", "revolutionize", "game-changer", "pivotal", "testament", "unravel", "foster", "beacon", "furthermore", "moreover", "in conclusion", "it is worth noting", "paradigm shift".
+2. HUMAN BURSTINESS & RHYTHM: Vary sentence lengths drastically like real human speech. Mix ultra-short 2-3 word sentences ("Here is why.", "Look.", "Pay attention.") with natural conversational explanations.
+3. NATURAL SPOKEN PHRASING: Always use natural spoken contractions ("here's", "it's", "don't", "that's", "you'll", "what's"). Speak like a high-level founder talking directly to a friend on a call.
+
 --- SCRIPT FORMAT REQUIREMENTS (35 to 45 seconds spoken aloud, 85 to 110 words) ---
 • Spoken words ONLY. NO stage directions, NO speaker names, NO emojis.
 • AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 relevant b-roll queries tailored to this topic:

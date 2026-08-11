@@ -1,8 +1,8 @@
 name: Instagram Carousel Auto-Poster
 on:
   schedule:
-    # Runs at 14:00 UTC and 21:00 UTC (10:00 AM & 5:00 PM US Eastern Time / 7:30 PM & 2:30 AM IST)
-    - cron: '0 14,21 * * *'
+    # Runs 4 times per day (00:00, 06:00, 12:00, 18:00 UTC) spaced 6 hours apart
+    - cron: '0 0,6,12,18 * * *'
   workflow_dispatch: # Allows manual trigger from GitHub UI
 
 jobs:

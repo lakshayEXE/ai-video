@@ -27,11 +27,9 @@ CONTEXT: "${topicSnippet}"
 
 Turn it into an agency-grade educational Instagram Carousel masterclass. Readers MUST learn actionable insights, frameworks, or case study takeaways that compel them to save and follow.
 
-DYNAMIC SLIDE COUNT RULE:
-Evaluate the depth of this topic:
-- If it is a concise news headline or quick tool tip: Generate exactly 5 slides.
-- If it is a deep framework, multi-step case study, or resource list: Generate 6 or 7 slides (maximum 7 slides).
-Zero fluff allowed. Every slide must deliver high signal and high value.
+ANTI-AI HUMAN COPYWRITING PROTOCOL (CRITICAL):
+- BANNED AI WORDS (NEVER USE IN SLIDES): "delve", "tapestry", "realm", "revolutionize", "game-changer", "pivotal", "testament", "unravel", "foster", "beacon", "furthermore", "moreover", "in conclusion", "it is worth noting", "paradigm shift".
+- Write slide titles, descriptions, and takeaways in ultra-crisp, natural human language as if written by a top Wall Street Journal or Morning Brew senior editor. Zero fluff or AI jargon.
 
 CRITICAL REQUIREMENT: Return ONLY raw valid JSON (no markdown block formatting, no code fences, no leading/trailing text).
 
