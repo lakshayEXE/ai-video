@@ -37,6 +37,8 @@ const EVERGREEN_CONCEPT_POOL = [
   { title: "The Zero-To-One Framework: Building Products That People Love", category: "STARTUP STRATEGY" }
 ];
 
+const seenNewsTitles = new Set();
+
 // Boring B2B / corporate terms to filter out for high audience retention
 const BORING_KEYWORDS = [
   'raises $', 'raised $', 'series a', 'series b', 'series c', 'seed round',
