@@ -14,29 +14,47 @@ export async function downloadMultiplePexelsVideos(query, count, outputDir) {
     throw new Error('PEXELS_API_KEY is not defined in .env.');
   }
 
-  console.log(`🔎 Searching Pexels for vertical video: "${query}"...`);
-  
-  try {
-    const searchRes = await axios.get('https://api.pexels.com/videos/search', {
-      headers: { Authorization: apiKey },
-      params: {
-        query: query,
-        orientation: 'portrait',
-        size: 'medium',
-        per_page: 30
-      }
-    });
+  const subQueries = query.split(',').map(q => q.trim()).filter(Boolean);
+  const perQueryCount = Math.max(1, Math.ceil(count / subQueries.length));
 
-    if (searchRes.data.videos.length === 0) {
-      throw new Error(`No vertical videos found on Pexels for query: "${query}"`);
+  console.log(`🔎 Searching Pexels for vertical videos across terms: ${JSON.stringify(subQueries)}...`);
+
+  try {
+    let allVideos = [];
+
+    for (const q of subQueries) {
+      try {
+        const searchRes = await axios.get('https://api.pexels.com/videos/search', {
+          headers: { Authorization: apiKey },
+          params: {
+            query: q,
+            orientation: 'portrait',
+            size: 'medium',
+            per_page: 20
+          }
+        });
+
+        if (searchRes.data.videos && searchRes.data.videos.length > 0) {
+          const picked = searchRes.data.videos.sort(() => 0.5 - Math.random()).slice(0, perQueryCount);
+          allVideos.push(...picked);
+        }
+      } catch (err) {
+        console.warn(`⚠️ Warning: Pexels query "${q}" failed:`, err.message);
+      }
     }
 
-    // Shuffle and pick top `count` videos
-    const videos = searchRes.data.videos.sort(() => 0.5 - Math.random()).slice(0, count);
-    
-    console.log(`📥 Found ${videos.length} clips! Downloading concurrently...`);
-    
-    const downloadPromises = videos.map(async (video, index) => {
+    if (allVideos.length === 0) {
+      const searchRes = await axios.get('https://api.pexels.com/videos/search', {
+        headers: { Authorization: apiKey },
+        params: { query: 'luxury wealth', orientation: 'portrait', size: 'medium', per_page: count }
+      });
+      allVideos = searchRes.data.videos.slice(0, count);
+    }
+
+    const selectedVideos = allVideos.slice(0, count);
+    console.log(`📥 Found ${selectedVideos.length} diverse B-roll clips! Downloading concurrently...`);
+
+    const downloadPromises = selectedVideos.map(async (video, index) => {
       let videoFile = video.video_files.find(f => f.height >= 1080 && f.width >= 720);
       if (!videoFile) {
         videoFile = video.video_files.reduce((prev, current) => (prev.width > current.width) ? prev : current);

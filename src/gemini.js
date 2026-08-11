@@ -20,19 +20,21 @@ export async function generateScript(newsTopic) {
   const ai = getAiClient();
   const response = await ai.models.generateContent({
     model: 'gemini-flash-latest',
-    contents: `You are an expert TikTok/Reels copywriter who specializes in highly viral, dark-psychology "Wealth & Side Hustle" faceless videos.
+    contents: `You are an elite, top 1% TikTok/Reels copywriter who specializes in highly viral, dark-psychology "Wealth & Side Hustle" faceless videos.
 Your goal is to spin this recent news topic into a secret money-making opportunity or intense wealth insight: "${newsTopic}".
 
-CRITICAL SCRIPT STRUCTURE (Exactly 65 to 75 seconds of spoken text):
-1. THE HOOK (First 3 seconds): Must be controversial, secretive, or a bold claim. (e.g. "If you are broke right now, it is entirely your fault." or "The rich are terrified that you will find out about this...")
-2. THE PIVOT: Connect the hook to the news topic, framing it as a massive hidden opportunity that 99% of people are missing.
-3. THE BLUEPRINT: Give 2 or 3 fast-paced, highly actionable "steps" on how the viewer can capitalize on this news to make money or get ahead.
-4. THE CTA (Call To Action): End abruptly with engagement bait (e.g. "Save this video before they take it down, and comment 'WEALTH' for the step-by-step guide.")
+CRITICAL SCRIPT STRUCTURE (Target length: EXACTLY 35 to 50 seconds of spoken text, approx 90-120 words):
+1. THE HOOK (First 3 seconds): MUST be controversial, highly specific, and include a specific dollar amount or timeframe. (e.g., "While everyone is panicking about the economy, 19-year-olds are using this hidden Google tool to clear $3,400 a week...", or "If you have $0 in your bank account, stop scrolling and listen to this exact 14-day strategy...")
+2. THE PIVOT: Connect the hook seamlessly to the news topic, framing it as a massive hidden opportunity that 99% of people are missing.
+3. THE OPEN-LOOP BLUEPRINT: Give 2 or 3 fast-paced, highly actionable steps. Insert a psychological open-loop in the middle (e.g. "Step 2 is what 90% of people get wrong, and it costs them thousands...").
+4. THE CTA (Call To Action): End abruptly with engagement bait (e.g. "Save this video before it gets taken down, and comment 'WEALTH' for the step-by-step blueprint.")
 
 RULES:
-- Tone: Intense, authoritative, slightly aggressive, and motivational.
+- Tone: Intense, authoritative, fast-paced, confident young millionaire persona.
 - NO brackets, NO stage directions, NO emojis in the spoken text. Spoken words ONLY.
-- AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one tag: [SEARCH: <1-2 word query for highly relevant aesthetic b-roll>] (Examples: If script is about money use [SEARCH: luxury cars], if about tech use [SEARCH: abstract tech], if about jobs use [SEARCH: office building]). Ensure the visual matches the topic!`
+- AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one tag with 3 comma-separated visual search terms:
+[SEARCH: <query 1>, <query 2>, <query 3>]
+Example: [SEARCH: luxury supercar, skyscraper night, trading charts]`
   });
   return response.text.trim();
 }
