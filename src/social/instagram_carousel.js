@@ -31,6 +31,7 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
   for (let i = 0; i < publicUrls.length; i++) {
     const url = publicUrls[i];
     const handle = process.env.INSTAGRAM_HANDLE || '@hustle.maxxing';
+    const slideInfo = slidesData[i] || {};
     const altText = slideInfo.alt_text || `AI wealth and side hustle guide slide ${i + 1} by ${handle}`;
 
     const res = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media`, {
@@ -72,26 +73,54 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
     throw new Error(`Failed to create Main Carousel Container: ${JSON.stringify(carouselData)}`);
   }
 
-  console.log(`✅ Main Carousel Container Created ID: ${carouselData.id}. Waiting 15s for Meta processing...`);
+  console.log(`✅ Main Carousel Container Created ID: ${carouselData.id}. Polling Meta processing status...`);
 
-  await new Promise(resolve => setTimeout(resolve, 15000));
+  // Step 4: Poll status and publish container
+  const containerId = carouselData.id;
+  const maxAttempts = 24; // Up to 2 minutes
+  let attempt = 0;
 
-  // Step 4: Publish Main Carousel Container
-  console.log(`📤 Publishing Carousel Container ${carouselData.id}...`);
-  const publishRes = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media_publish`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      creation_id: carouselData.id,
-      access_token: token
-    })
-  });
+  while (attempt < maxAttempts) {
+    attempt++;
+    await new Promise(res => setTimeout(res, 5000));
 
-  const publishData = await publishRes.json();
-  if (publishData.error) {
-    throw new Error(`Instagram Carousel Publish Error: ${JSON.stringify(publishData.error)}`);
+    try {
+      const statusRes = await fetch(`https://graph.facebook.com/v19.0/${containerId}?fields=status_code,status&access_token=${token}`);
+      const statusData = await statusRes.json();
+      const statusCode = statusData.status_code;
+
+      console.log(`⏳ [Attempt ${attempt}/${maxAttempts}] Carousel container ${containerId} status: ${statusCode || 'UNKNOWN'}`);
+
+      if (statusCode === 'FINISHED' || !statusCode) {
+        console.log(`🚀 Publishing Carousel Container ${containerId}...`);
+        const publishRes = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media_publish`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            creation_id: containerId,
+            access_token: token
+          })
+        });
+
+        const publishData = await publishRes.json();
+        if (publishData.error) {
+          throw new Error(`Instagram Carousel Publish Error: ${JSON.stringify(publishData.error)}`);
+        }
+
+        console.log(`🎉 Successfully Published Carousel to Instagram! ID: ${publishData.id}`);
+        return publishData;
+      }
+
+      if (statusCode === 'ERROR') {
+        throw new Error(`Meta Carousel Processing Failed for Container ${containerId}: ${JSON.stringify(statusData)}`);
+      }
+    } catch (err) {
+      if (attempt >= maxAttempts || err.message.includes('Publish Error') || err.message.includes('Processing Failed')) {
+        throw err;
+      }
+      console.warn(`⚠️ Temporary error checking carousel status: ${err.message}. Retrying...`);
+    }
   }
 
-  console.log(`🎉 Successfully Published Carousel to Instagram! ID: ${publishData.id}`);
-  return publishData;
+  throw new Error(`Meta Carousel processing timed out after 2 minutes for container ${containerId}.`);
 }
