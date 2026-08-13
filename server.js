@@ -96,7 +96,7 @@ async function waitForApproval(script) {
 /**
  * Main Autonomous Pipeline (Designed for single-execution GitHub Actions cron)
  */
-async function runPipeline() {
+async function runPipeline(overrideNewsTopic = null) {
   try {
     // Organic Random Delay (1-10 mins) when running in GitHub Actions to randomize timestamps
     if (process.env.GITHUB_ACTIONS) {
@@ -105,26 +105,31 @@ async function runPipeline() {
       await new Promise((resolve) => setTimeout(resolve, randomMinutes * 60 * 1000));
     }
 
-    if (bot) bot.launch(); 
+    if (bot && !bot.polling) bot.launch(); 
 
-    console.log('\n📰 Step 1: Agent 0 (Virality Auditor) evaluating RSS news topics...');
     let news;
-    let viralityResult = { score: 0, reason: '' };
-    let attempts = 0;
+    if (overrideNewsTopic) {
+      console.log(`⚡ Custom Topic Triggered via Telegram: "${overrideNewsTopic.title || overrideNewsTopic}"`);
+      news = typeof overrideNewsTopic === 'string' ? { title: overrideNewsTopic, category: 'CUSTOM TOPIC' } : overrideNewsTopic;
+    } else {
+      console.log('\n📰 Step 1: Agent 0 (Virality Auditor) evaluating RSS news topics...');
+      let viralityResult = { score: 0, reason: '' };
+      let attempts = 0;
 
-    // Up to 3 iterations to find a topic scoring >= 7/10 for US AI/tech audience
-    while (attempts < 3) {
-      attempts++;
-      console.log(`\n🔄 Agent 0 Topic Evaluation Attempt ${attempts}/3...`);
-      news = await getLatestNewsTopic('mixed');
-      viralityResult = await evaluateTopicVirality(news);
+      // Up to 3 iterations to find a topic scoring >= 7/10 for US AI/tech audience
+      while (attempts < 3) {
+        attempts++;
+        console.log(`\n🔄 Agent 0 Topic Evaluation Attempt ${attempts}/3...`);
+        news = await getLatestNewsTopic('mixed');
+        viralityResult = await evaluateTopicVirality(news);
 
-      if (viralityResult.score >= 7) {
-        console.log(`🎯 QUALIFIED VIRAL TOPIC ACCEPTED! (Score: ${viralityResult.score}/10)`);
-        break;
-      } else {
-        console.log(`⚠️ Topic score ${viralityResult.score}/10 < 7. Rejecting & pausing 6s before candidate ${attempts + 1}...`);
-        await new Promise((res) => setTimeout(res, 6000));
+        if (viralityResult.score >= 7) {
+          console.log(`🎯 QUALIFIED VIRAL TOPIC ACCEPTED! (Score: ${viralityResult.score}/10)`);
+          break;
+        } else {
+          console.log(`⚠️ Topic score ${viralityResult.score}/10 < 7. Rejecting & pausing 6s before candidate ${attempts + 1}...`);
+          await new Promise((res) => setTimeout(res, 6000));
+        }
       }
     }
 
@@ -243,5 +248,45 @@ async function runPipeline() {
   }
 }
 
-// Start Execution
-runPipeline();
+// Telegram Interactive Command Handler Mode
+if (process.argv.includes('--bot-listen') || process.env.ENABLE_BOT_POLLING === 'true') {
+  if (bot && chatId) {
+    console.log('🤖 Telegram Bot Polling Mode Active! Listening for commands...');
+
+    bot.command('start', (ctx) => {
+      ctx.reply(`⚡ (@hustle.maxxing) AI Influencer Engine Control Panel:
+
+• /generate <custom topic> - Build reel for custom topic
+• /viral - Trigger Agent 0 viral news search & build
+• /stats - View B-roll cache & pipeline health`);
+    });
+
+    bot.command('stats', (ctx) => {
+      const cacheDir = path.join(process.cwd(), 'assets', 'broll_cache');
+      const cacheCount = fs.existsSync(cacheDir) ? fs.readdirSync(cacheDir).filter(f => f.endsWith('.mp4')).length : 0;
+      ctx.reply(`📊 Pipeline Health & Cache Stats:
+• B-Roll HD Clips in Cache: ${cacheCount}
+• Gemini API Free Tier Pacing: 6s active delay
+• Target Audience: US Tech / SaaS / Solopreneurs`);
+    });
+
+    bot.command('viral', async (ctx) => {
+      ctx.reply('🚀 Triggering Agent 0 Virality Auditor & Reel Pipeline...');
+      runPipeline();
+    });
+
+    bot.command('generate', async (ctx) => {
+      const text = ctx.message.text.replace('/generate', '').trim();
+      if (!text) {
+        return ctx.reply('⚠️ Please specify a topic! Example:\n/generate Sam Altman announced GPT-5');
+      }
+      ctx.reply(`🎬 Creating 4-Agent Reel for custom topic:\n"${text}"...`);
+      runPipeline({ title: text, category: 'CUSTOM TECH ALERT' });
+    });
+
+    bot.launch();
+  }
+} else {
+  // Direct Execution Mode for GitHub Actions Cron or Local CLI
+  runPipeline();
+}
