@@ -11,11 +11,11 @@ function getAiClient() {
   return new GoogleGenAI({ apiKey });
 }
 
-async function callGeminiWithRetry(contents, model = 'gemini-2.5-flash', retries = 4) {
+async function callGeminiWithRetry(contents, model = 'gemini-2.5-flash', retries = 4, config = {}) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       const ai = getAiClient();
-      return await ai.models.generateContent({ model, contents });
+      return await ai.models.generateContent({ model, contents, config });
     } catch (err) {
       if (err.status === 429 || (err.message && err.message.includes('RESOURCE_EXHAUSTED'))) {
         const waitSec = attempt * 12;
@@ -31,31 +31,43 @@ async function callGeminiWithRetry(contents, model = 'gemini-2.5-flash', retries
 
 /**
  * Agent 0: Virality Auditor & Topic Scorer
- * Rates news topics 1-10 specifically for an American AI/Tech/Solopreneur audience.
+ * Rates news topics 1-10 specifically for an American AI/Tech/Solopreneur audience using Live Search Grounding.
  */
 export async function evaluateTopicVirality(newsTopicInput) {
   const title = typeof newsTopicInput === 'object' ? newsTopicInput.title : newsTopicInput;
   const snippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : title;
 
-  console.log(`🔍 Agent 0: Auditing virality score for topic: "${title}"...`);
+  console.log(`🌐 Agent 0: Running Live Search Grounding on AI creator trends for topic: "${title}"...`);
 
-  const response = await callGeminiWithRetry(`You are the Head of Virality & Audience Intelligence at (@hustle.maxxing).
-Your job is to rate this news/meme/tech topic out of 10 based on its potential to go viral for an American AI, Tech, SaaS, and Solopreneur audience on Instagram Reels / TikTok.
+  let response;
+  try {
+    response = await callGeminiWithRetry(
+      `You are the Head of Virality & Audience Intelligence at (@hustle.maxxing).
+Search the live web for what top AI creators, tech news outlets, and X/Twitter builders are saying about this topic right now.
+Rate this topic out of 10 based on its live viral potential for an American AI, Tech, SaaS, and Solopreneur audience on Instagram Reels / TikTok.
 
 TOPIC: "${title}"
 CONTEXT: "${snippet}"
 
 EVALUATION CRITERIA:
-1. High-Stakes Relevance (OpenAI, Claude, Elon Musk, AI Agents, Big Tech, Meme Culture, Wealth).
-2. Broad Curiosity / Shock Value for US tech audience.
+1. High-Stakes Relevance (OpenAI, Claude, DeepSeek, AI Agents, Big Tech, Meme Culture, Wealth).
+2. Real-Time Creator Buzz & Shock Value.
 3. Actionable or High-FOMO Angle.
 
 FORMAT INSTRUCTIONS:
 Return a JSON object ONLY in this schema:
 {
-  "score": 8,
-  "reason": "High interest in OpenAI release with strong FOMO potential for US developers."
-}`);
+  "score": 9,
+  "reason": "Top AI creators on Twitter and YouTube are currently buzzing about this release."
+}`,
+      'gemini-2.5-flash',
+      4,
+      { tools: [{ googleSearch: {} }] }
+    );
+  } catch (err) {
+    console.warn('⚠️ Agent 0 Live Search Grounding fallback applied:', err.message);
+    return { score: 8, reason: "High interest tech concept accepted via fallback." };
+  }
 
   try {
     const rawJson = response.text.trim().replace(/```json|```/g, '').trim();
