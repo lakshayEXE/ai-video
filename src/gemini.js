@@ -67,9 +67,10 @@ Evaluate the topic and commit 100% to EXACTLY ONE of the 4 pure styles below. Do
 
 --- ANTI-AI DETECTION & HUMAN VOICE PROTOCOL (CRITICAL) ---
 Make the script sound 100% human, authentic, and organic. Eliminate all robotic AI writing signatures:
-1. BANNED AI WORDS (NEVER USE): "delve", "tapestry", "realm", "revolutionize", "game-changer", "pivotal", "testament", "unravel", "foster", "beacon", "furthermore", "moreover", "in conclusion", "it is worth noting", "paradigm shift".
-2. HUMAN BURSTINESS & RHYTHM: Vary sentence lengths drastically like real human speech. Mix ultra-short 2-3 word sentences ("Here is why.", "Look.", "Pay attention.") with natural conversational explanations.
-3. NATURAL SPOKEN PHRASING: Always use natural spoken contractions ("here's", "it's", "don't", "that's", "you'll", "what's"). Speak like a high-level founder talking directly to a friend on a call.
+1. HIGH ENERGY & FOMO URGENCY: Deliver with high-stakes urgency. Make the audience feel like they are falling behind or missing out on a massive opportunity if they skip this video.
+2. BANNED AI WORDS (NEVER USE): "delve", "tapestry", "realm", "revolutionize", "game-changer", "pivotal", "testament", "unravel", "foster", "beacon", "furthermore", "moreover", "in conclusion", "it is worth noting", "paradigm shift".
+3. HUMAN BURSTINESS & RHYTHM: Vary sentence lengths drastically like real human speech. Mix ultra-short 2-3 word sentences ("Stop.", "Look.", "Pay attention.") with natural conversational explanations.
+4. NATURAL SPOKEN PHRASING: Always use natural spoken contractions ("here's", "it's", "don't", "that's", "you'll", "what's"). Speak like a high-level founder talking directly to a friend on an urgent call.
 
 --- SCRIPT FORMAT REQUIREMENTS (35 to 45 seconds spoken aloud, 85 to 110 words) ---
 • Spoken words ONLY. NO stage directions, NO speaker names, NO emojis.
@@ -80,12 +81,18 @@ Make the script sound 100% human, authentic, and organic. Eliminate all robotic 
   const draftScript = response.text.trim();
   
   // Pass 2: AI Viral Reviewer & Hook Maximizer Layer
-  return await reviewAndRefineScript(draftScript, topicTitle);
+  const reviewResult = await reviewAndRefineScript(draftScript, topicTitle);
+  
+  return {
+    draftScript,
+    reviewerNotes: reviewResult.reviewerNotes,
+    finalScript: reviewResult.finalScript
+  };
 }
 
 /**
  * Pass 2: AI Viral Director Reviewer
- * Audits the draft script, maximizes 3-second clickbait & curiosity, and polishes human cadence.
+ * Audits draft script, generates explicit viral director feedback, and outputs final high-FOMO script.
  */
 export async function reviewAndRefineScript(draftScript, topicTitle) {
   const ai = getAiClient();
@@ -100,20 +107,38 @@ DRAFT SCRIPT:
 "${draftScript}"
 
 YOUR REVIEW & REFINEMENT OBJECTIVES:
-1. AUDIT THE 3-SECOND HOOK: Make the first sentence 30% more high-stakes, curious, and irresistible ("viral clickbait" hook that compels people to pause scrolling instantly).
+1. AUDIT THE 3-SECOND HOOK FOR INTENSE FOMO & HIGH URGENCY: Make sentence 1 high-energy, razor-sharp, and urgent ("If you skip this, you are missing out on the biggest shift right now...").
 2. ELIMINATE throat-clearing: Ensure sentence 1 delivers an immediate punch with zero setup delays.
 3. ENFORCE HUMAN VOICE & BURSTINESS: Remove any robotic AI buzzwords ("delve", "realm", "tapestry", "game-changer", "revolutionize"). Use natural contractions ("here's", "it's", "don't").
 4. PRESERVE DURATION: Keep exact spoken length between 35 and 45 seconds (85 to 110 words).
 
-RULES:
-- Output pure spoken script text ONLY. NO stage directions, NO speaker labels, NO emojis.
-- AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, preserve or enhance the search tag:
-[SEARCH: <query 1>, <query 2>, <query 3>]`
+FORMAT INSTRUCTIONS:
+First, provide 2 short bullet points under "[PASS 2 AUDIT NOTES]" explaining what you improved (e.g. hook FOMO boost & word cuts).
+Then, provide "[FINAL REFINED SCRIPT]" containing ONLY the final polished spoken text + search tag.
+
+Example Output Format:
+[PASS 2 AUDIT NOTES]
+- Amplified 3-second hook with 40% higher urgency and FOMO ("Stop scrolling...").
+- Trimmed setup filler and removed AI buzzwords.
+
+[FINAL REFINED SCRIPT]
+Stop scrolling if you build in tech. Sam Altman just dropped...
+[SEARCH: Sam Altman, AI artificial intelligence, technology code]`
   });
 
-  const polishedScript = response.text.trim();
+  const rawText = response.text.trim();
+  
+  let reviewerNotes = 'Amplified 3-second hook for intense FOMO & high-stakes urgency.';
+  let finalScript = rawText;
+
+  if (rawText.includes('[PASS 2 AUDIT NOTES]') && rawText.includes('[FINAL REFINED SCRIPT]')) {
+    const parts = rawText.split('[FINAL REFINED SCRIPT]');
+    reviewerNotes = parts[0].replace('[PASS 2 AUDIT NOTES]', '').trim();
+    finalScript = parts[1].trim();
+  }
+
   console.log('🔥 Pass 2: AI Script Review & 3-Second Viral Hook Optimization Complete!');
-  return polishedScript;
+  return { reviewerNotes, finalScript };
 }
 
 /**

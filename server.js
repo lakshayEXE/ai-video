@@ -111,27 +111,37 @@ async function runPipeline() {
     const news = await getLatestNewsTopic('mixed');
     const topic = news.title;
     
-    console.log(`✍️ Step 2: Drafting script via Gemini 2.5 Flash for topic: "${topic}"...`);
-    const initialScript = await generateScript(news);
+    console.log(`✍️ Step 2: Running 2-Pass Gemini 2.5 Flash Script Engine for topic: "${topic}"...`);
+    const scriptOutput = await generateScript(news);
+
+    const draftScript = typeof scriptOutput === 'object' ? scriptOutput.draftScript : scriptOutput;
+    const reviewerNotes = typeof scriptOutput === 'object' ? scriptOutput.reviewerNotes : 'FOMO & Urgency Hook Optimization Applied.';
+    const finalScriptText = typeof scriptOutput === 'object' ? scriptOutput.finalScript : scriptOutput;
 
     if (bot && chatId) {
+      const telegramMsg = `🎬 *2-PASS AI VIRAL SCRIPT AUDIT*\n\n` +
+        `📌 *TOPIC:* ${topic}\n\n` +
+        `1️⃣ *PASS 1 (INITIAL DRAFT):*\n\`\`\`\n${draftScript}\n\`\`\`\n\n` +
+        `2️⃣ *PASS 2 (AI DIRECTOR AUDIT & FOMO BOOST):*\n${reviewerNotes}\n\n` +
+        `3️⃣ *FINAL REFINED SCRIPT:* \n\`\`\`\n${finalScriptText}\n\`\`\``;
+
       await bot.telegram.sendMessage(
         chatId,
-        `📝 *NEW SCRIPT DRAFT*\n\n*Topic:* ${topic}\n\n---\n${initialScript}\n---`,
+        telegramMsg,
         {
           parse_mode: 'Markdown',
           ...Markup.inlineKeyboard([
-            [Markup.button.callback('✅ Approve Script', 'approve_script')],
+            [Markup.button.callback('✅ Approve & Render', 'approve_script')],
             [Markup.button.callback('🔄 Rewrite with Feedback', 'feedback_script')],
             [Markup.button.callback('🛑 Cancel', 'abort')]
           ])
         }
       );
-      console.log('📬 Script sent to Telegram. Waiting up to 5 minutes for approval...');
+      console.log('📬 2-Pass Script breakdown sent to Telegram! Waiting for approval...');
     }
 
     // Step 3: Wait for user approval or 5m timeout
-    const finalScript = await waitForApproval(initialScript);
+    const finalScript = await waitForApproval(finalScriptText);
 
     // Stop listening to prevent GitHub Actions from hanging indefinitely
     if (bot) bot.stop('SIGINT');
