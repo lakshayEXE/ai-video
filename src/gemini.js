@@ -11,6 +11,8 @@ function getAiClient() {
   return new GoogleGenAI({ apiKey });
 }
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function callGeminiWithRetry(contents, model = 'gemini-2.5-flash', retries = 4, config = {}) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
@@ -18,15 +20,15 @@ async function callGeminiWithRetry(contents, model = 'gemini-2.5-flash', retries
       return await ai.models.generateContent({ model, contents, config });
     } catch (err) {
       if (err.status === 429 || (err.message && err.message.includes('RESOURCE_EXHAUSTED'))) {
-        const waitSec = attempt * 12;
-        console.warn(`⏳ Gemini Rate Limit (429) hit on attempt ${attempt}/${retries}. Waiting ${waitSec} seconds...`);
-        await new Promise(res => setTimeout(res, waitSec * 1000));
+        const waitSec = attempt * 15;
+        console.warn(`⏳ Gemini Free Tier Rate Limit (429) hit on attempt ${attempt}/${retries}. Pausing ${waitSec} seconds for quota reset...`);
+        await sleep(waitSec * 1000);
       } else {
         throw err;
       }
     }
   }
-  throw new Error('Gemini API quota exceeded after retries.');
+  throw new Error('Gemini API free tier quota limit reached.');
 }
 
 /**
@@ -90,6 +92,7 @@ export async function generateScript(newsTopicInput) {
   const topicCategory = (typeof newsTopicInput === 'object' && newsTopicInput.category) ? newsTopicInput.category : 'BUSINESS & TECH';
   const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
 
+  console.log('✍️ Agent 1: Drafting initial script...');
   const response = await callGeminiWithRetry(`You are an elite, world-class media director and script architect for (@hustle.maxxing).
 
 Your job is to analyze this topic and cook ONE PURE, MASTERFULLY TAILORED 40-second vertical video script (Reels/TikTok).
@@ -145,8 +148,16 @@ Make the script sound 100% human, authentic, and organic. Eliminate all robotic 
 
   const draftScript = response.text.trim();
   
+  // Pacing delay to respect Gemini Free Tier 15 RPM limits
+  console.log('⏱️ Free Tier Pacing: Pausing 6 seconds before Agent 2...');
+  await sleep(6000);
+
   // Agent 2: AI Viral Reviewer & FOMO Maximizer Layer
   const reviewResult = await reviewAndRefineScript(draftScript, topicTitle);
+
+  // Pacing delay to respect Gemini Free Tier 15 RPM limits
+  console.log('⏱️ Free Tier Pacing: Pausing 6 seconds before Agent 3...');
+  await sleep(6000);
 
   // Agent 3: Visual Scene Director & Shot Sync Agent Layer
   const shotList = await generateSceneShotList(reviewResult.finalScript, topicTitle);
