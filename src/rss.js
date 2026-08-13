@@ -2,25 +2,21 @@ import Parser from 'rss-parser';
 
 const parser = new Parser();
 
-// 5 High-Signal Verticals for Research Ingestion
+// High-Signal & High-Virality Verticals for Trending Ingestion
 const RSS_VERTICALS = {
-  ai_tech: [
-    'https://news.google.com/rss/search?q=artificial+intelligence+breakthrough&hl=en-US&gl=US&ceid=US:en',
+  ai_trending: [
+    'https://news.google.com/rss/search?q=OpenAI+OR+ChatGPT+OR+Sam+Altman&hl=en-US&gl=US&ceid=US:en',
+    'https://news.google.com/rss/search?q=Claude+AI+OR+Anthropic+OR+Gemini+AI&hl=en-US&gl=US&ceid=US:en',
     'https://techcrunch.com/category/artificial-intelligence/feed/',
     'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml'
   ],
-  startups_saas: [
-    'https://techcrunch.com/category/startups/feed/',
-    'https://news.ycombinator.com/rss',
-    'https://news.google.com/rss/search?q=saas+startup+funding+growth&hl=en-US&gl=US&ceid=US:en'
+  viral_tech: [
+    'https://news.google.com/rss/search?q=Elon+Musk+AI+OR+Nvidia+AI+breakthrough&hl=en-US&gl=US&ceid=US:en',
+    'https://news.google.com/rss/search?q=AI+automation+future+of+jobs&hl=en-US&gl=US&ceid=US:en',
+    'https://wired.com/feed/category/business/latest/rss'
   ],
-  business_wealth: [
-    'https://wired.com/feed/category/business/latest/rss',
-    'https://news.google.com/rss/search?q=digital+business+strategy+market&hl=en-US&gl=US&ceid=US:en',
-    'https://www.cnbc.com/id/19854910/device/rss/rss.html'
-  ],
-  productivity_tech: [
-    'https://news.google.com/rss/search?q=productivity+software+tools+tech&hl=en-US&gl=US&ceid=US:en',
+  productivity_wealth: [
+    'https://news.google.com/rss/search?q=best+AI+tools+productivity+solopreneur&hl=en-US&gl=US&ceid=US:en',
     'https://lifehacker.com/rss'
   ]
 };
@@ -104,10 +100,9 @@ export async function getLatestNewsTopic(requestedMode = 'mixed') {
     }
 
     const categoryMap = {
-      ai_tech: 'AI BREAKTHROUGH',
-      startups_saas: 'STARTUP CASE STUDY',
-      business_wealth: 'MARKET STRATEGY',
-      productivity_tech: 'PRODUCTIVITY STACK'
+      ai_trending: 'AI BREAKTHROUGH',
+      viral_tech: 'TRENDING TECH',
+      productivity_wealth: 'PRODUCTIVITY & WEALTH'
     };
 
     return {
