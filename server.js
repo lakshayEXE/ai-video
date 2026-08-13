@@ -6,7 +6,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { getLatestNewsTopic } from './src/rss.js';
-import { generateScript, reviseScript, generateAudio } from './src/gemini.js';
+import { evaluateTopicVirality, generateScript, reviseScript, generateAudio } from './src/gemini.js';
 import { processFinalVideo } from './src/editor.js';
 import { downloadMultiplePexelsVideos } from './src/pexels.js';
 import { uploadToTmpFiles } from './src/tmpupload.js';
@@ -107,23 +107,46 @@ async function runPipeline() {
 
     if (bot) bot.launch(); 
 
-    console.log('\n📰 Step 1: Fetching latest news from RSS feed...');
-    const news = await getLatestNewsTopic('mixed');
+    console.log('\n📰 Step 1: Agent 0 (Virality Auditor) evaluating RSS news topics...');
+    let news;
+    let viralityResult = { score: 0, reason: '' };
+    let attempts = 0;
+
+    // Up to 3 iterations to find a topic scoring >= 7/10 for US AI/tech audience
+    while (attempts < 3) {
+      attempts++;
+      console.log(`\n🔄 Agent 0 Topic Evaluation Attempt ${attempts}/3...`);
+      news = await getLatestNewsTopic('mixed');
+      viralityResult = await evaluateTopicVirality(news);
+
+      if (viralityResult.score >= 7) {
+        console.log(`🎯 QUALIFIED VIRAL TOPIC ACCEPTED! (Score: ${viralityResult.score}/10)`);
+        break;
+      } else {
+        console.log(`⚠️ Topic score ${viralityResult.score}/10 < 7. Rejecting & fetching candidate ${attempts + 1}...`);
+      }
+    }
+
     const topic = news.title;
     
-    console.log(`✍️ Step 2: Running 2-Pass Gemini 2.5 Flash Script Engine for topic: "${topic}"...`);
+    console.log(`✍️ Step 2: Executing Autonomous 4-Agent AI Pipeline for topic: "${topic}"...`);
     const scriptOutput = await generateScript(news);
 
     const draftScript = typeof scriptOutput === 'object' ? scriptOutput.draftScript : scriptOutput;
     const reviewerNotes = typeof scriptOutput === 'object' ? scriptOutput.reviewerNotes : 'FOMO & Urgency Hook Optimization Applied.';
     const finalScriptText = typeof scriptOutput === 'object' ? scriptOutput.finalScript : scriptOutput;
+    const shotList = (typeof scriptOutput === 'object' && scriptOutput.shotList) ? scriptOutput.shotList : [];
 
     if (bot && chatId) {
-      const telegramMsg = `🎬 *2-PASS AI VIRAL SCRIPT AUDIT*\n\n` +
-        `📌 *TOPIC:* ${topic}\n\n` +
-        `1️⃣ *PASS 1 (INITIAL DRAFT):*\n\`\`\`\n${draftScript}\n\`\`\`\n\n` +
-        `2️⃣ *PASS 2 (AI DIRECTOR AUDIT & FOMO BOOST):*\n${reviewerNotes}\n\n` +
-        `3️⃣ *FINAL REFINED SCRIPT:* \n\`\`\`\n${finalScriptText}\n\`\`\``;
+      let sceneSummary = shotList.map(s => `• Scene ${s.scene} (${s.name}): "${s.query}" [${s.motion}]`).join('\n');
+
+      const telegramMsg = `🎬 *AUTONOMOUS 4-AGENT REEL PIPELINE*\n\n` +
+        `📌 *TOPIC:* ${topic}\n` +
+        `📊 *AGENT 0 VIRALITY SCORE:* ${viralityResult.score}/10 (${viralityResult.reason})\n\n` +
+        `1️⃣ *AGENT 1 (INITIAL DRAFT):*\n\`\`\`\n${draftScript}\n\`\`\`\n\n` +
+        `2️⃣ *AGENT 2 (VIRAL DIRECTOR & FOMO BOOST):*\n${reviewerNotes}\n\n` +
+        `3️⃣ *AGENT 3 (VISUAL SCENE DIRECTOR & SHOT SYNC):*\n${sceneSummary}\n\n` +
+        `🔥 *FINAL SCRIPT FOR VOICEOVER:*\n\`\`\`\n${finalScriptText}\n\`\`\``;
 
       await bot.telegram.sendMessage(
         chatId,
@@ -137,7 +160,7 @@ async function runPipeline() {
           ])
         }
       );
-      console.log('📬 2-Pass Script breakdown sent to Telegram! Waiting for approval...');
+      console.log('📬 3-Agent Script & Scene Breakdown sent to Telegram! Waiting for approval...');
     }
 
     // Step 3: Wait for user approval or 5m timeout
@@ -149,13 +172,13 @@ async function runPipeline() {
     const tmpDir = path.resolve('./tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
-    // Step 4: Extract Search Query
-    let searchQuery = 'luxury cars';
+    // Step 4: Extract Search Query & Clean Script
+    let searchQuery = shotList.length > 0 ? shotList.map(s => s.query).join(', ') : 'cyberpunk technology AI, software developer code, workstation setup';
     let cleanScript = finalScript;
     const searchRegex = /\[SEARCH:\s*(.*?)\]/i;
     const match = finalScript.match(searchRegex);
     if (match && match[1]) {
-      searchQuery = match[1].trim();
+      if (shotList.length === 0) searchQuery = match[1].trim();
       cleanScript = finalScript.replace(searchRegex, '').trim();
     }
 

@@ -7,8 +7,15 @@ const RSS_VERTICALS = {
   ai_trending: [
     'https://news.google.com/rss/search?q=OpenAI+OR+ChatGPT+OR+Sam+Altman&hl=en-US&gl=US&ceid=US:en',
     'https://news.google.com/rss/search?q=Claude+AI+OR+Anthropic+OR+Gemini+AI&hl=en-US&gl=US&ceid=US:en',
+    'https://hnrss.org/newest?q=AI+OR+LLM+OR+OpenAI+OR+Claude+OR+DeepSeek',
     'https://techcrunch.com/category/artificial-intelligence/feed/',
+    'https://venturebeat.com/category/ai/feed/',
     'https://www.theverge.com/rss/ai-artificial-intelligence/index.xml'
+  ],
+  ai_agents_creators: [
+    'https://news.google.com/rss/search?q=AI+agents+OR+autonomous+AI+OR+Cursor+AI+OR+DeepSeek&hl=en-US&gl=US&ceid=US:en',
+    'https://hnrss.org/newest?q=agentic+OR+autonomous+agent+OR+coding+assistant',
+    'https://venturebeat.com/feed/'
   ],
   viral_tech: [
     'https://news.google.com/rss/search?q=Elon+Musk+AI+OR+Nvidia+AI+breakthrough&hl=en-US&gl=US&ceid=US:en',
@@ -21,16 +28,18 @@ const RSS_VERTICALS = {
   ]
 };
 
-// Curated Evergreen Masterclass Topics Pool (Fallback & Deep Concepts)
+// Curated Evergreen Masterclass Topics Pool (Fallback & Creator Sphere Deep Concepts)
 const EVERGREEN_CONCEPT_POOL = [
+  { title: "The Agentic Shift: Why AI Chatbots are Dead and Autonomous Agents Are Winning", category: "AI AGENTS" },
+  { title: "DeepSeek vs Claude Opus vs GPT: The Multi-Model Routing Framework for 2026", category: "BENCHMARK WAR" },
   { title: "How 7-Figure Solopreneurs Build Automated AI Workflows", category: "SOLOPRENEUR PLAYBOOK" },
   { title: "The 80/20 Rule of SaaS Monetization & Pricing Strategy", category: "BUSINESS FRAMEWORK" },
   { title: "Understanding RAG (Retrieval-Augmented Generation) in 5 Simple Steps", category: "TECH BREAKDOWN" },
-  { title: "How Micro-SaaS Founders Reach $10k/Month with Zero Employees", category: "CASE STUDY" },
-  { title: "The Psychology of Viral Instagram Hooks & High-Retention Content", category: "CREATOR ECONOMY" },
-  { title: "Vector Databases Explained: Why Traditional Search is Obsolete", category: "FUTURE TECH" },
-  { title: "5 Essential AI Tools Every High-Performance Founder Uses in 2026", category: "PRODUCTIVITY STACK" },
-  { title: "The Zero-To-One Framework: Building Products That People Love", category: "STARTUP STRATEGY" }
+  { title: "How Micro-SaaS Founders Reach $10k/Month with Zero Employees Using AI Agents", category: "CASE STUDY" },
+  { title: "The Psychology of Viral Instagram Hooks & High-Retention AI Content", category: "CREATOR ECONOMY" },
+  { title: "Vector Databases & Semantic Search: Why Keyword Search is Obsolete", category: "FUTURE TECH" },
+  { title: "5 Essential AI Developer Tools Every High-Performance Founder Uses", category: "PRODUCTIVITY STACK" },
+  { title: "The Zero-To-One Framework: Building Autonomous Products That Scale", category: "STARTUP STRATEGY" }
 ];
 
 const seenNewsTitles = new Set();
@@ -101,6 +110,7 @@ export async function getLatestNewsTopic(requestedMode = 'mixed') {
 
     const categoryMap = {
       ai_trending: 'AI BREAKTHROUGH',
+      ai_agents_creators: 'AUTONOMOUS AGENTS',
       viral_tech: 'TRENDING TECH',
       productivity_wealth: 'PRODUCTIVITY & WEALTH'
     };

@@ -110,12 +110,14 @@ export async function processFinalVideo(rawVideoPaths, audioPath, scriptText, ou
     ffmpegCmd += `-i "${bgMusicPath}" `;
   }
 
-  // Build Complex Filter for Dynamic Clips
+  // Build Complex Filter for Dynamic Clips with Ken Burns Motion
   let filterComplex = '-filter_complex "';
   let concatInputs = '';
   
   for (let i = 0; i < numClips; i++) {
-    filterComplex += `[${i}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,trim=duration=${clipDuration.toFixed(2)},setpts=PTS-STARTPTS[v${i}]; `;
+    // Alternating subtle zoom_in and zoom_out Ken Burns camera motion
+    const zoomExpr = i % 2 === 0 ? "min(zoom+0.0012,1.15)" : "max(1.15-0.0012*on,1.0)";
+    filterComplex += `[${i}:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1,zoompan=z='${zoomExpr}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=150:s=1080x1920,trim=duration=${clipDuration.toFixed(2)},setpts=PTS-STARTPTS[v${i}]; `;
     concatInputs += `[v${i}]`;
   }
   
@@ -124,7 +126,11 @@ export async function processFinalVideo(rawVideoPaths, audioPath, scriptText, ou
   
   // Bold, highly-visible yellow captions in lower-middle zone (Alignment=2, MarginV=40)
   const subtitleStyle = `FontName=Arial,FontSize=22,PrimaryColour=&H00FFFF,OutlineColour=&H000000,BorderStyle=1,Outline=3,Shadow=2,Bold=1,Alignment=2,MarginV=40`;
-  filterComplex += `[concat_out]subtitles='${escapedSrtPath}':force_style='${subtitleStyle}'[final_v]; `;
+  filterComplex += `[concat_out]subtitles='${escapedSrtPath}':force_style='${subtitleStyle}'[sub_out]; `;
+
+  // Add Executive Top Category Banner Overlay
+  const categoryBanner = `drawtext=text='⚡ HUSTLE MAXXING  •  AI BREAKTHROUGH':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=120:box=1:boxcolor=0x0B0F17@0.85:boxborderw=12`;
+  filterComplex += `[sub_out]${categoryBanner}[final_v]; `;
 
   if (hasBgMusic) {
     const bgIndex = numClips + 1;

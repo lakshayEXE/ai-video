@@ -11,20 +11,74 @@ function getAiClient() {
   return new GoogleGenAI({ apiKey });
 }
 
+async function callGeminiWithRetry(contents, model = 'gemini-2.5-flash', retries = 4) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const ai = getAiClient();
+      return await ai.models.generateContent({ model, contents });
+    } catch (err) {
+      if (err.status === 429 || (err.message && err.message.includes('RESOURCE_EXHAUSTED'))) {
+        const waitSec = attempt * 12;
+        console.warn(`⏳ Gemini Rate Limit (429) hit on attempt ${attempt}/${retries}. Waiting ${waitSec} seconds...`);
+        await new Promise(res => setTimeout(res, waitSec * 1000));
+      } else {
+        throw err;
+      }
+    }
+  }
+  throw new Error('Gemini API quota exceeded after retries.');
+}
+
+/**
+ * Agent 0: Virality Auditor & Topic Scorer
+ * Rates news topics 1-10 specifically for an American AI/Tech/Solopreneur audience.
+ */
+export async function evaluateTopicVirality(newsTopicInput) {
+  const title = typeof newsTopicInput === 'object' ? newsTopicInput.title : newsTopicInput;
+  const snippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : title;
+
+  console.log(`🔍 Agent 0: Auditing virality score for topic: "${title}"...`);
+
+  const response = await callGeminiWithRetry(`You are the Head of Virality & Audience Intelligence at (@hustle.maxxing).
+Your job is to rate this news/meme/tech topic out of 10 based on its potential to go viral for an American AI, Tech, SaaS, and Solopreneur audience on Instagram Reels / TikTok.
+
+TOPIC: "${title}"
+CONTEXT: "${snippet}"
+
+EVALUATION CRITERIA:
+1. High-Stakes Relevance (OpenAI, Claude, Elon Musk, AI Agents, Big Tech, Meme Culture, Wealth).
+2. Broad Curiosity / Shock Value for US tech audience.
+3. Actionable or High-FOMO Angle.
+
+FORMAT INSTRUCTIONS:
+Return a JSON object ONLY in this schema:
+{
+  "score": 8,
+  "reason": "High interest in OpenAI release with strong FOMO potential for US developers."
+}`);
+
+  try {
+    const rawJson = response.text.trim().replace(/```json|```/g, '').trim();
+    const result = JSON.parse(rawJson);
+    console.log(`📊 Agent 0 Virality Score: ${result.score}/10 | Reason: ${result.reason}`);
+    return result;
+  } catch (err) {
+    console.warn('⚠️ Agent 0 Virality Auditor parse error, defaulting score to 8:', err.message);
+    return { score: 8, reason: "Default high interest tech topic." };
+  }
+}
+
 /**
  * Drafts an initial punchy 45-second vertical script for a tech/business influencer.
  * @param {object|string} newsTopicInput - News headline object or topic summary
  * @returns {Promise<string>}
  */
 export async function generateScript(newsTopicInput) {
-  const ai = getAiClient();
   const topicTitle = typeof newsTopicInput === 'object' ? newsTopicInput.title : newsTopicInput;
   const topicCategory = (typeof newsTopicInput === 'object' && newsTopicInput.category) ? newsTopicInput.category : 'BUSINESS & TECH';
   const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: `You are an elite, world-class media director and script architect for (@hustle.maxxing).
+  const response = await callGeminiWithRetry(`You are an elite, world-class media director and script architect for (@hustle.maxxing).
 
 Your job is to analyze this topic and cook ONE PURE, MASTERFULLY TAILORED 40-second vertical video script (Reels/TikTok).
 
@@ -75,32 +129,32 @@ Make the script sound 100% human, authentic, and organic. Eliminate all robotic 
 --- SCRIPT FORMAT REQUIREMENTS (35 to 45 seconds spoken aloud, 85 to 110 words) ---
 • Spoken words ONLY. NO stage directions, NO speaker names, NO emojis.
 • AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 short 2-word visual Pexels queries matching this specific topic (e.g. [SEARCH: macbook desk setup, software developer code, futuristic AI technology]):
-[SEARCH: <query 1>, <query 2>, <query 3>]`
-  });
+[SEARCH: <query 1>, <query 2>, <query 3>]`);
 
   const draftScript = response.text.trim();
   
-  // Pass 2: AI Viral Reviewer & Hook Maximizer Layer
+  // Agent 2: AI Viral Reviewer & FOMO Maximizer Layer
   const reviewResult = await reviewAndRefineScript(draftScript, topicTitle);
-  
+
+  // Agent 3: Visual Scene Director & Shot Sync Agent Layer
+  const shotList = await generateSceneShotList(reviewResult.finalScript, topicTitle);
+
   return {
     draftScript,
     reviewerNotes: reviewResult.reviewerNotes,
-    finalScript: reviewResult.finalScript
+    finalScript: reviewResult.finalScript,
+    shotList
   };
 }
 
 /**
- * Pass 2: AI Viral Director Reviewer
+ * Agent 2: AI Viral Director Reviewer
  * Audits draft script, generates explicit viral director feedback, and outputs final high-FOMO script.
  */
 export async function reviewAndRefineScript(draftScript, topicTitle) {
-  const ai = getAiClient();
-  console.log('🧐 Pass 2: Running Gemini AI Viral Director Reviewer on draft script...');
+  console.log('🧐 Agent 2: Running Gemini AI Viral Director Reviewer on draft script...');
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: `You are the Lead Viral Growth Director at (@hustle.maxxing).
+  const response = await callGeminiWithRetry(`You are the Lead Viral Growth Director at (@hustle.maxxing).
 Your job is to review and upgrade this draft video script about "${topicTitle}".
 
 DRAFT SCRIPT:
@@ -123,8 +177,7 @@ Example Output Format:
 
 [FINAL REFINED SCRIPT]
 Stop scrolling if you build in tech. Sam Altman just dropped...
-[SEARCH: Sam Altman, AI artificial intelligence, technology code]`
-  });
+[SEARCH: Sam Altman, AI artificial intelligence, technology code]`);
 
   const rawText = response.text.trim();
   
@@ -137,8 +190,56 @@ Stop scrolling if you build in tech. Sam Altman just dropped...
     finalScript = parts[1].trim();
   }
 
-  console.log('🔥 Pass 2: AI Script Review & 3-Second Viral Hook Optimization Complete!');
+  console.log('🔥 Agent 2: AI Script Review & 3-Second Viral Hook Optimization Complete!');
   return { reviewerNotes, finalScript };
+}
+
+/**
+ * Agent 3: Visual Scene Director & Shot Sync Agent
+ * Maps script lines 1:1 with 4 sequential visual scenes and assigns Ken Burns camera motion vectors.
+ */
+export async function generateSceneShotList(finalScript, topicTitle) {
+  console.log('🎬 Agent 3: Running Visual Scene Director & Shot Sync Agent...');
+
+  try {
+    const response = await callGeminiWithRetry(`You are the Lead Visual Director at (@hustle.maxxing).
+Your job is to take this video script about "${topicTitle}" and create a 4-Scene Shot List mapping the spoken text directly to visual B-roll scenes and camera motion vectors.
+
+SCRIPT:
+"${finalScript}"
+
+TASK:
+Break down the script into 4 sequential scenes:
+- Scene 1 (Hook - 0s to 4s): High-stakes visual term + motion (e.g., zoom_in)
+- Scene 2 (Mechanism - 4s to 18s): Technical/system visual term + motion (e.g., pan_right)
+- Scene 3 (Shift - 18s to 32s): Impact/metrics visual term + motion (e.g., zoom_out)
+- Scene 4 (CTA - 32s to 40s): Brand/action visual term + motion (e.g., pan_left)
+
+FORMAT INSTRUCTIONS:
+Return a JSON array ONLY with 4 scene objects in this exact schema:
+[
+  { "scene": 1, "name": "Hook", "query": "cyberpunk glowing AI core", "motion": "zoom_in" },
+  { "scene": 2, "name": "Mechanism", "query": "software developer dark code screen", "motion": "pan_right" },
+  { "scene": 3, "name": "Shift", "query": "futuristic workstation tech setup", "motion": "zoom_out" },
+  { "scene": 4, "name": "CTA", "query": "dark tech smartphone app screen", "motion": "pan_left" }
+]`);
+
+    const rawJson = response.text.trim().replace(/```json|```/g, '').trim();
+    const shotList = JSON.parse(rawJson);
+    console.log('✅ Agent 3: 4-Scene Shot List & Camera Motion Vectors generated!');
+    return shotList;
+  } catch (err) {
+    console.warn('⚠️ Agent 3 fallback shot list applied:', err.message);
+    const searchMatch = finalScript.match(/\[SEARCH:\s*(.*?)\]/i);
+    const searchTerms = searchMatch ? searchMatch[1].split(',').map(s => s.trim()) : [topicTitle];
+    
+    return [
+      { scene: 1, name: "Hook", query: searchTerms[0] || "cyberpunk glowing AI core", motion: "zoom_in" },
+      { scene: 2, name: "Mechanism", query: searchTerms[1] || "software developer code screen", motion: "pan_right" },
+      { scene: 3, name: "Shift", query: searchTerms[2] || "futuristic workstation setup", motion: "zoom_out" },
+      { scene: 4, name: "CTA", query: "dark tech smartphone app screen", motion: "pan_left" }
+    ];
+  }
 }
 
 /**
