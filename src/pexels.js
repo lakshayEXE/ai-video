@@ -15,10 +15,6 @@ export async function downloadMultiplePexelsVideos(query, count, outputDir) {
   }
 
   const subQueries = query.split(',').map(q => q.trim()).filter(Boolean);
-  // Ensure the video opens with a human face hook clip
-  if (!subQueries.some(q => q.includes('man') || q.includes('person') || q.includes('face'))) {
-    subQueries.unshift('young man business podcast');
-  }
   const perQueryCount = Math.max(1, Math.ceil(count / subQueries.length));
 
   console.log(`🔎 Searching Pexels for vertical videos across terms: ${JSON.stringify(subQueries)}...`);
@@ -34,7 +30,7 @@ export async function downloadMultiplePexelsVideos(query, count, outputDir) {
             query: q,
             orientation: 'portrait',
             size: 'large',
-            per_page: 20
+            per_page: 15
           }
         });
 
@@ -48,9 +44,10 @@ export async function downloadMultiplePexelsVideos(query, count, outputDir) {
     }
 
     if (allVideos.length === 0) {
+      console.log('⚠️ Fallback: Fetching high-aesthetic dark tech B-roll...');
       const searchRes = await axios.get('https://api.pexels.com/videos/search', {
         headers: { Authorization: apiKey },
-        params: { query: 'luxury wealth', orientation: 'portrait', size: 'large', per_page: count }
+        params: { query: 'cyberpunk technology AI', orientation: 'portrait', size: 'large', per_page: count }
       });
       allVideos = searchRes.data.videos.slice(0, count);
     }

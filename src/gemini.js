@@ -74,7 +74,7 @@ Make the script sound 100% human, authentic, and organic. Eliminate all robotic 
 
 --- SCRIPT FORMAT REQUIREMENTS (35 to 45 seconds spoken aloud, 85 to 110 words) ---
 • Spoken words ONLY. NO stage directions, NO speaker names, NO emojis.
-• AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 relevant b-roll queries tailored to this topic:
+• AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 short 2-word visual Pexels queries matching this specific topic (e.g. [SEARCH: macbook desk setup, software developer code, futuristic AI technology]):
 [SEARCH: <query 1>, <query 2>, <query 3>]`
   });
 
