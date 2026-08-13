@@ -34,6 +34,11 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
     const slideInfo = slidesData[i] || {};
     const altText = slideInfo.alt_text || `AI wealth and side hustle guide slide ${i + 1} by ${handle}`;
 
+    // Add 1.5s delay between sub-container requests to avoid triggering Meta burst rate limits
+    if (i > 0) {
+      await new Promise(res => setTimeout(res, 1500));
+    }
+
     const res = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,6 +61,7 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
 
   // Step 3: Create Main Carousel Container
   console.log('\n📤 Step 3: Creating Main Instagram Carousel Container...');
+  await new Promise(res => setTimeout(res, 2000));
 
   const carouselRes = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media`, {
     method: 'POST',
@@ -93,22 +99,36 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
 
       if (statusCode === 'FINISHED' || !statusCode) {
         console.log(`🚀 Publishing Carousel Container ${containerId}...`);
-        const publishRes = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media_publish`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            creation_id: containerId,
-            access_token: token
-          })
-        });
 
-        const publishData = await publishRes.json();
-        if (publishData.error) {
-          throw new Error(`Instagram Carousel Publish Error: ${JSON.stringify(publishData.error)}`);
+        // Rate-limit resilient publish loop
+        let publishAttempts = 0;
+        while (publishAttempts < 3) {
+          publishAttempts++;
+          const publishRes = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media_publish`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              creation_id: containerId,
+              access_token: token
+            })
+          });
+
+          const publishData = await publishRes.json();
+
+          if (publishData.error) {
+            const errCode = publishData.error.code;
+            const subCode = publishData.error.error_subcode;
+            if ((errCode === 4 || subCode === 2207051) && publishAttempts < 3) {
+              console.warn(`⚠️ Meta API Rate Limit hit (Code ${errCode}/Subcode ${subCode}). Waiting 45 seconds before retry ${publishAttempts}/3...`);
+              await new Promise(r => setTimeout(r, 45000));
+              continue;
+            }
+            throw new Error(`Instagram Carousel Publish Error: ${JSON.stringify(publishData.error)}`);
+          }
+
+          console.log(`🎉 Successfully Published Carousel to Instagram! ID: ${publishData.id}`);
+          return publishData;
         }
-
-        console.log(`🎉 Successfully Published Carousel to Instagram! ID: ${publishData.id}`);
-        return publishData;
       }
 
       if (statusCode === 'ERROR') {
