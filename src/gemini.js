@@ -76,7 +76,44 @@ Make the script sound 100% human, authentic, and organic. Eliminate all robotic 
 • AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, add exactly one search tag with 3 relevant b-roll queries tailored to this topic:
 [SEARCH: <query 1>, <query 2>, <query 3>]`
   });
-  return response.text.trim();
+
+  const draftScript = response.text.trim();
+  
+  // Pass 2: AI Viral Reviewer & Hook Maximizer Layer
+  return await reviewAndRefineScript(draftScript, topicTitle);
+}
+
+/**
+ * Pass 2: AI Viral Director Reviewer
+ * Audits the draft script, maximizes 3-second clickbait & curiosity, and polishes human cadence.
+ */
+export async function reviewAndRefineScript(draftScript, topicTitle) {
+  const ai = getAiClient();
+  console.log('🧐 Pass 2: Running Gemini AI Viral Director Reviewer on draft script...');
+
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.5-flash',
+    contents: `You are the Lead Viral Growth Director at (@hustle.maxxing).
+Your job is to review and upgrade this draft video script about "${topicTitle}".
+
+DRAFT SCRIPT:
+"${draftScript}"
+
+YOUR REVIEW & REFINEMENT OBJECTIVES:
+1. AUDIT THE 3-SECOND HOOK: Make the first sentence 30% more high-stakes, curious, and irresistible ("viral clickbait" hook that compels people to pause scrolling instantly).
+2. ELIMINATE throat-clearing: Ensure sentence 1 delivers an immediate punch with zero setup delays.
+3. ENFORCE HUMAN VOICE & BURSTINESS: Remove any robotic AI buzzwords ("delve", "realm", "tapestry", "game-changer", "revolutionize"). Use natural contractions ("here's", "it's", "don't").
+4. PRESERVE DURATION: Keep exact spoken length between 35 and 45 seconds (85 to 110 words).
+
+RULES:
+- Output pure spoken script text ONLY. NO stage directions, NO speaker labels, NO emojis.
+- AT THE VERY END OF YOUR RESPONSE, ON A NEW LINE, preserve or enhance the search tag:
+[SEARCH: <query 1>, <query 2>, <query 3>]`
+  });
+
+  const polishedScript = response.text.trim();
+  console.log('🔥 Pass 2: AI Script Review & 3-Second Viral Hook Optimization Complete!');
+  return polishedScript;
 }
 
 /**
