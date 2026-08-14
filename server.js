@@ -117,18 +117,18 @@ async function runPipeline(overrideNewsTopic = null) {
       console.log('\n📰 Step 1: Agent 0 (Virality Auditor) evaluating RSS news topics...');
       let attempts = 0;
 
-      // Up to 3 iterations to find a topic scoring >= 7/10 for US AI/tech audience
-      while (attempts < 3) {
+      // Up to 5 iterations to find a topic scoring >= 8/10 for US AI/tech audience
+      while (attempts < 5) {
         attempts++;
-        console.log(`\n🔄 Agent 0 Topic Evaluation Attempt ${attempts}/3...`);
+        console.log(`\n🔄 Agent 0 Topic Evaluation Attempt ${attempts}/5...`);
         news = await getLatestNewsTopic('mixed');
         viralityResult = await evaluateTopicVirality(news);
 
-        if (viralityResult.score >= 7) {
-          console.log(`🎯 QUALIFIED VIRAL TOPIC ACCEPTED! (Score: ${viralityResult.score}/10)`);
+        if (viralityResult.score >= 8) {
+          console.log(`🎯 HIGH VIRALITY TOPIC ACCEPTED! (Score: ${viralityResult.score}/10 >= 8/10)`);
           break;
         } else {
-          console.log(`⚠️ Topic score ${viralityResult.score}/10 < 7. Rejecting & pausing 10s before candidate ${attempts + 1}...`);
+          console.log(`⚠️ Topic score ${viralityResult.score}/10 < 8. Rejecting & pausing 10s before candidate ${attempts + 1}...`);
           await new Promise((res) => setTimeout(res, 10000));
         }
       }

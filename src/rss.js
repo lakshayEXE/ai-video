@@ -34,6 +34,11 @@ export function markTopicAsPublished(title) {
 
 // High-Signal & High-Virality Verticals for Trending Ingestion
 const RSS_VERTICALS = {
+  ai_research_papers: [
+    'https://rss.arxiv.org/rss/cs.AI',
+    'https://news.google.com/rss/search?q=AI+paper+OR+arXiv+AI+breakthrough+OR+HuggingFace+trending+paper&hl=en-US&gl=US&ceid=US:en',
+    'https://hnrss.org/newest?q=paper+OR+arXiv+OR+benchmark+OR+reasoning+model+OR+DeepSeek'
+  ],
   ai_trending: [
     'https://news.google.com/rss/search?q=OpenAI+OR+ChatGPT+OR+Sam+Altman&hl=en-US&gl=US&ceid=US:en',
     'https://news.google.com/rss/search?q=Claude+AI+OR+Anthropic+OR+Gemini+AI&hl=en-US&gl=US&ceid=US:en',
@@ -147,6 +152,7 @@ export async function getLatestNewsTopic(requestedMode = 'mixed') {
     markTopicAsPublished(selectedItem.title);
 
     const categoryMap = {
+      ai_research_papers: 'PAPER BREAKDOWN',
       ai_trending: 'AI BREAKTHROUGH',
       ai_agents_creators: 'AUTONOMOUS AGENTS',
       viral_tech: 'TRENDING TECH',

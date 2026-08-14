@@ -8,6 +8,7 @@ import { getLatestNewsTopic } from './src/rss.js';
 import { generateCarouselContent } from './src/carousel_prompt.js';
 import { renderCarouselSlides } from './src/carousel_renderer.js';
 import { uploadCarouselToInstagram } from './src/social/instagram_carousel.js';
+import { evaluateTopicVirality } from './src/gemini.js';
 import { Telegraf } from 'telegraf';
 
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -24,10 +25,26 @@ async function runCarouselPipeline() {
       await new Promise((resolve) => setTimeout(resolve, randomMinutes * 60 * 1000));
     }
 
-    // Step 1: Research Ingestion (News or Evergreen Concept)
-    console.log('\n📰 Step 1: Ingesting high-signal topic via Multi-Feed Engine...');
-    const newsTopic = await getLatestNewsTopic('mixed');
-    console.log(`📌 Target Topic: "${newsTopic.title}" [Category: ${newsTopic.category || 'EXECUTIVE BREAKDOWN'}]`);
+    // Step 1: Agent 0 (Virality Auditor) Topic Evaluation
+    console.log('\n📰 Step 1: Agent 0 (Virality Auditor) evaluating topics for Virality Score >= 8/10...');
+    let newsTopic;
+    let viralityResult = { score: 0, reason: '' };
+    let attempts = 0;
+
+    while (attempts < 5) {
+      attempts++;
+      console.log(`\n🔄 Agent 0 Carousel Topic Evaluation Attempt ${attempts}/5...`);
+      newsTopic = await getLatestNewsTopic('mixed');
+      viralityResult = await evaluateTopicVirality(newsTopic);
+
+      if (viralityResult.score >= 8) {
+        console.log(`🎯 HIGH VIRALITY CAROUSEL TOPIC ACCEPTED! (Score: ${viralityResult.score}/10 >= 8/10)`);
+        break;
+      } else {
+        console.log(`⚠️ Topic score ${viralityResult.score}/10 < 8. Rejecting & pausing 10s before candidate ${attempts + 1}...`);
+        await new Promise((res) => setTimeout(res, 10000));
+      }
+    }
 
     // Step 2: Senior Editorial Copywriting via Gemini 2.5 Flash
     console.log('\n✍️ Step 2: Drafting Agency-Grade 5-Slide Masterclass via Gemini...');

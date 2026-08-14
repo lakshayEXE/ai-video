@@ -91,7 +91,7 @@ export async function generateScript(newsTopicInput) {
   const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
 
   console.log('✍️ Agent 1: Drafting initial script...');
-  const response = await callGeminiWithRetry(`You are an elite, world-class media director and script architect for (@ai.maxxing_).
+  const response = await callGeminiWithRetry(`You are (@ai.maxxing_) — an authentic AI wrapper influencer using free API credits to gain deep technical knowledge and present the world's best AI breakthroughs in a high-signal, zero-fluff way for founders and developers.
 
 Your job is to analyze this topic and cook ONE PURE, MASTERFULLY TAILORED 40-second vertical video script (Reels/TikTok).
 
@@ -173,28 +173,31 @@ Make the script sound 100% human, authentic, and organic. Eliminate all robotic 
  * Audits draft script, generates explicit viral director feedback, and outputs final high-FOMO script.
  */
 export async function reviewAndRefineScript(draftScript, topicTitle) {
-  console.log('🧐 Agent 2: Running Gemini AI Viral Director Reviewer on draft script...');
+  console.log('🧐 Agent 2: Running Gemini AI Viral Director Reviewer & Virality Confidence Audit on draft script...');
 
   const response = await callGeminiWithRetry(`You are the Lead Viral Growth Director at (@ai.maxxing_).
-Your job is to review and upgrade this draft video script about "${topicTitle}".
+Your job is to review and upgrade this draft video script about "${topicTitle}" to ensure it achieves a Virality Confidence Score of ABOVE 8/10 for American AI, Tech, SaaS, and Solopreneur audiences.
 
 DRAFT SCRIPT:
 "${draftScript}"
 
 YOUR REVIEW & REFINEMENT OBJECTIVES:
-1. AUDIT THE 3-SECOND HOOK FOR INTENSE FOMO & HIGH URGENCY: Make sentence 1 high-energy, razor-sharp, and urgent ("If you skip this, you are missing out on the biggest shift right now...").
-2. ELIMINATE throat-clearing: Ensure sentence 1 delivers an immediate punch with zero setup delays.
-3. ENFORCE HUMAN VOICE & BURSTINESS: Remove any robotic AI buzzwords ("delve", "realm", "tapestry", "game-changer", "revolutionize"). Use natural contractions ("here's", "it's", "don't").
-4. PRESERVE DURATION: Keep exact spoken length between 35 and 45 seconds (85 to 110 words).
+1. ENFORCE VIRALITY CONFIDENCE SCORE >= 8/10: Audit hook, pacing, burstiness, and retention. If score is below 8, aggressively rewrite the script to push score to 9/10 or 10/10.
+2. AUDIT THE 3-SECOND HOOK FOR INTENSE FOMO & HIGH URGENCY: Make sentence 1 high-energy, razor-sharp, and urgent ("If you build in tech, stop scrolling...").
+3. ELIMINATE throat-clearing filler: Ensure sentence 1 delivers an immediate punch with zero setup delays.
+4. ENFORCE NATURAL HUMAN VOICE & BURSTINESS: Remove all robotic AI buzzwords ("delve", "realm", "tapestry", "game-changer", "revolutionize"). Use natural contractions ("here's", "it's", "don't").
+5. PRESERVE DURATION: Keep exact spoken length between 35 and 45 seconds (85 to 110 words).
 
 FORMAT INSTRUCTIONS:
-First, provide 2 short bullet points under "[PASS 2 AUDIT NOTES]" explaining what you improved (e.g. hook FOMO boost & word cuts).
-Then, provide "[FINAL REFINED SCRIPT]" containing ONLY the final polished spoken text + search tag.
+First line MUST specify "[PASS 2 VIRALITY CONFIDENCE SCORE: X/10]".
+Then provide 2 short bullet points under "[PASS 2 AUDIT NOTES]" explaining what you improved.
+Then provide "[FINAL REFINED SCRIPT]" containing ONLY the final polished spoken text + search tag.
 
 Example Output Format:
+[PASS 2 VIRALITY CONFIDENCE SCORE: 9/10]
 [PASS 2 AUDIT NOTES]
-- Amplified 3-second hook with 40% higher urgency and FOMO ("Stop scrolling...").
-- Trimmed setup filler and removed AI buzzwords.
+- Amplified 3-second hook with 50% higher urgency and FOMO ("Stop scrolling...").
+- Trimmed setup filler and achieved 9/10 virality confidence score.
 
 [FINAL REFINED SCRIPT]
 Stop scrolling if you build in tech. Sam Altman just dropped...
@@ -202,16 +205,16 @@ Stop scrolling if you build in tech. Sam Altman just dropped...
 
   const rawText = response.text.trim();
   
-  let reviewerNotes = 'Amplified 3-second hook for intense FOMO & high-stakes urgency.';
+  let reviewerNotes = 'Virality Confidence Score: 9/10. Amplified 3-second hook for intense FOMO & high-stakes urgency.';
   let finalScript = rawText;
 
   if (rawText.includes('[PASS 2 AUDIT NOTES]') && rawText.includes('[FINAL REFINED SCRIPT]')) {
     const parts = rawText.split('[FINAL REFINED SCRIPT]');
-    reviewerNotes = parts[0].replace('[PASS 2 AUDIT NOTES]', '').trim();
+    reviewerNotes = parts[0].trim();
     finalScript = parts[1].trim();
   }
 
-  console.log('🔥 Agent 2: AI Script Review & 3-Second Viral Hook Optimization Complete!');
+  console.log('🔥 Agent 2: AI Script Review & Virality Confidence Optimization Complete!');
   return { reviewerNotes, finalScript };
 }
 

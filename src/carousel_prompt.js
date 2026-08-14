@@ -19,17 +19,21 @@ export async function generateCarouselContent(newsTopicInput) {
   const topicCategory = (typeof newsTopicInput === 'object' && newsTopicInput.category) ? newsTopicInput.category : 'BUSINESS CASE STUDY';
   const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
 
-  const prompt = `You are the Senior Editorial Director for a top-tier media brand (like Visual Capitalist or Morning Brew) running (@ai.maxxing_).
-Your task is to take this research topic:
+  const prompt = `You are (@ai.maxxing_) — an AI wrapper influencer leveraging free API credits to learn and present complex AI research papers, model architectures, and technical breakthroughs in the cleanest, most engaging 5 to 7 slide infographic masterclasses.
+Your task is to take this AI research paper or tech topic:
 TITLE: "${topicTitle}"
 CATEGORY: "${topicCategory}"
 CONTEXT: "${topicSnippet}"
 
-Turn it into an agency-grade educational Instagram Carousel masterclass. Readers MUST learn actionable insights, frameworks, or case study takeaways that compel them to save and follow.
+PAPER SIMPLIFICATION PROTOCOL (MAKE IT EASY, TRENDING & FUN):
+1. SIMPLIFY COMPLEX AI PAPERS: Translate academic math, dense benchmarks, and technical jargon into 3 crystal-clear, relatable real-world analogies. Explain it like you're talking to a smart 18-year-old developer or founder.
+2. HIGH-STAKES HOOK (SLIDE 1): Frame the cover slide title with high curiosity and FOMO (e.g. "This 12-Page AI Paper Just Killed Prompt Engineering").
+3. STEP-BY-STEP BREAKDOWN (SLIDES 2-5): Break down: (A) The Problem, (B) The Breakthrough Architecture/Method, (C) Key Benchmark Results, (D) How Developers & Founders Can Use It Today.
+4. HIGH RETENTION & SAVE TRIGGER: Make every slide takeaway so actionable that readers feel compelled to hit 'Save'.
 
 ANTI-AI HUMAN COPYWRITING PROTOCOL (CRITICAL):
-- BANNED AI WORDS (NEVER USE IN SLIDES): "delve", "tapestry", "realm", "revolutionize", "game-changer", "pivotal", "testament", "unravel", "foster", "beacon", "furthermore", "moreover", "in conclusion", "it is worth noting", "paradigm shift".
-- Write slide titles, descriptions, and takeaways in ultra-crisp, natural human language as if written by a top Wall Street Journal or Morning Brew senior editor. Zero fluff or AI jargon.
+- BANNED AI WORDS (NEVER USE IN SLIDES): "delve", "tapestry", "realm", "revolutionize", "game-changer", "pivotal", "testament", "unravel", "foster", "beacon", "furthermore", "moreover", "in conclusion", "it is worth noting", "paradigm shift", "hence", "thus".
+- Write slide titles, descriptions, and takeaways in ultra-crisp, energetic, human language like a top TechCrunch / Morning Brew lead editor. Zero dry academic jargon.
 
 CRITICAL REQUIREMENT: Return ONLY raw valid JSON (no markdown block formatting, no code fences, no leading/trailing text).
 
