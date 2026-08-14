@@ -108,12 +108,13 @@ async function runPipeline(overrideNewsTopic = null) {
     if (bot && !bot.polling) bot.launch(); 
 
     let news;
+    let viralityResult = { score: 8, reason: 'High virality topic selected for American AI audience' };
+
     if (overrideNewsTopic) {
       console.log(`⚡ Custom Topic Triggered via Telegram: "${overrideNewsTopic.title || overrideNewsTopic}"`);
       news = typeof overrideNewsTopic === 'string' ? { title: overrideNewsTopic, category: 'CUSTOM TOPIC' } : overrideNewsTopic;
     } else {
       console.log('\n📰 Step 1: Agent 0 (Virality Auditor) evaluating RSS news topics...');
-      let viralityResult = { score: 0, reason: '' };
       let attempts = 0;
 
       // Up to 3 iterations to find a topic scoring >= 7/10 for US AI/tech audience
