@@ -176,9 +176,6 @@ async function runPipeline(overrideNewsTopic = null) {
     // Step 3: Wait for user approval or 5m timeout
     const finalScript = await waitForApproval(finalScriptText);
 
-    // Stop listening to prevent GitHub Actions from hanging indefinitely
-    if (bot) bot.stop('SIGINT');
-
     const tmpDir = path.resolve('./tmp');
     if (!fs.existsSync(tmpDir)) fs.mkdirSync(tmpDir, { recursive: true });
 
@@ -233,7 +230,7 @@ async function runPipeline(overrideNewsTopic = null) {
     let instagramSuccess = false;
     let instagramError = '';
 
-    if (publicUrl) {
+    if (publicUrl && process.env.DRY_RUN !== 'true') {
       try {
         console.log('📤 Posting to Instagram Reels...');
         await uploadToInstagram(publicUrl, caption);
@@ -244,18 +241,17 @@ async function runPipeline(overrideNewsTopic = null) {
         console.warn('⚠️ Instagram API Upload Failed:', instagramError);
       }
     } else {
-      instagramError = 'Temporary public URL could not be generated for Meta API.';
+      instagramError = process.env.DRY_RUN === 'true' ? 'DRY_RUN mode enabled' : 'Temporary public URL could not be generated for Meta API.';
     }
 
     // Step 10: Dispatch Video & Status directly to Telegram Chat
     if (bot && chatId) {
-      const tempBot = new Telegraf(botToken);
       if (instagramSuccess) {
-        await tempBot.telegram.sendMessage(chatId, `🎉 *Published to Instagram Reels!*\n\n📌 *Topic*: ${topic}`, { parse_mode: 'Markdown' });
+        await bot.telegram.sendMessage(chatId, `🎉 *Published to Instagram Reels!*\n\n📌 *Topic*: ${topic}`, { parse_mode: 'Markdown' });
       } else {
-        await tempBot.telegram.sendMessage(
+        await bot.telegram.sendMessage(
           chatId,
-          `⚠️ *Instagram API Upload Failed*\n\nReason: \`${instagramError}\`\n\n📥 *Here is your rendered Reel video!* You can download and publish it manually:`,
+          `⚠️ *Instagram API Upload Status*: ${instagramError}\n\n📥 *Here is your rendered Reel video!* You can download and publish it manually:`,
           { parse_mode: 'Markdown' }
         );
       }
@@ -263,7 +259,7 @@ async function runPipeline(overrideNewsTopic = null) {
       // Send the MP4 video file directly to your phone via Telegram!
       try {
         console.log('📱 Sending rendered video file directly to Telegram chat...');
-        await tempBot.telegram.sendVideo(
+        await bot.telegram.sendVideo(
           chatId,
           { source: finalVideoPath },
           { caption: `🎬 *${topic}*\n\n${caption}`, parse_mode: 'Markdown' }
