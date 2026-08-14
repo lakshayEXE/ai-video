@@ -129,7 +129,7 @@ export async function processFinalVideo(rawVideoPaths, audioPath, scriptText, ou
   filterComplex += `[concat_out]subtitles='${escapedSrtPath}':force_style='${subtitleStyle}'[sub_out]; `;
 
   // Add Executive Top Category Banner Overlay
-  const categoryBanner = `drawtext=text='⚡ HUSTLE MAXXING  •  AI BREAKTHROUGH':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=120:box=1:boxcolor=0x0B0F17@0.85:boxborderw=12`;
+  const categoryBanner = `drawtext=text='⚡ AI.MAXXING_  •  AI BREAKTHROUGH':fontcolor=white:fontsize=24:x=(w-text_w)/2:y=120:box=1:boxcolor=0x0B0F17@0.85:boxborderw=12`;
   filterComplex += `[sub_out]${categoryBanner}[final_v]; `;
 
   if (hasBgMusic) {

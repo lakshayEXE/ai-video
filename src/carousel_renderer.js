@@ -21,7 +21,7 @@ function renderSlideHtml(slideData, slideIndex, totalSlides = 5, bgAssetPath = n
 
   const categoryTag = slideData.category || 'EXECUTIVE BREAKDOWN';
   const readTime = slideData.read_time || '2 MIN READ';
-  const handle = process.env.INSTAGRAM_HANDLE || '@hustle.maxxing';
+  const handle = process.env.INSTAGRAM_HANDLE || '@ai.maxxing_';
 
   // Build top progress bar segments
   let progressBarHtml = '<div class="progress-bar">';

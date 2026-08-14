@@ -44,7 +44,7 @@ export async function evaluateTopicVirality(newsTopicInput) {
   let response;
   try {
     response = await callGeminiWithRetry(
-      `You are the Head of Virality & Audience Intelligence at (@hustle.maxxing).
+      `You are the Head of Virality & Audience Intelligence at (@ai.maxxing_).
 Analyze this tech/business news topic and rate its viral potential out of 10 for an American AI, Tech, SaaS, and Solopreneur audience on Instagram Reels / TikTok.
 
 TOPIC: "${title}"
@@ -91,7 +91,7 @@ export async function generateScript(newsTopicInput) {
   const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
 
   console.log('✍️ Agent 1: Drafting initial script...');
-  const response = await callGeminiWithRetry(`You are an elite, world-class media director and script architect for (@hustle.maxxing).
+  const response = await callGeminiWithRetry(`You are an elite, world-class media director and script architect for (@ai.maxxing_).
 
 Your job is to analyze this topic and cook ONE PURE, MASTERFULLY TAILORED 40-second vertical video script (Reels/TikTok).
 
@@ -175,7 +175,7 @@ Make the script sound 100% human, authentic, and organic. Eliminate all robotic 
 export async function reviewAndRefineScript(draftScript, topicTitle) {
   console.log('🧐 Agent 2: Running Gemini AI Viral Director Reviewer on draft script...');
 
-  const response = await callGeminiWithRetry(`You are the Lead Viral Growth Director at (@hustle.maxxing).
+  const response = await callGeminiWithRetry(`You are the Lead Viral Growth Director at (@ai.maxxing_).
 Your job is to review and upgrade this draft video script about "${topicTitle}".
 
 DRAFT SCRIPT:
@@ -223,7 +223,7 @@ export async function generateSceneShotList(finalScript, topicTitle) {
   console.log('🎬 Agent 3: Running Visual Scene Director & Shot Sync Agent...');
 
   try {
-    const response = await callGeminiWithRetry(`You are the Lead Visual Director at (@hustle.maxxing).
+    const response = await callGeminiWithRetry(`You are the Lead Visual Director at (@ai.maxxing_).
 Your job is to take this video script about "${topicTitle}" and create a 4-Scene Shot List mapping the spoken text directly to visual B-roll scenes and camera motion vectors.
 
 SCRIPT:

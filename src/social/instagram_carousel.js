@@ -30,7 +30,7 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
 
   for (let i = 0; i < publicUrls.length; i++) {
     const url = publicUrls[i];
-    const handle = process.env.INSTAGRAM_HANDLE || '@hustle.maxxing';
+    const handle = process.env.INSTAGRAM_HANDLE || '@ai.maxxing_';
     const slideInfo = slidesData[i] || {};
     const altText = slideInfo.alt_text || `AI wealth and side hustle guide slide ${i + 1} by ${handle}`;
 
@@ -86,23 +86,25 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
   const maxAttempts = 24; // Up to 2 minutes
   let attempt = 0;
 
+  console.log('⏱️ Waiting 15 seconds for Meta Graph API to process all slide containers...');
+  await new Promise(res => setTimeout(res, 15000));
+
   while (attempt < maxAttempts) {
     attempt++;
-    await new Promise(res => setTimeout(res, 5000));
 
     try {
       const statusRes = await fetch(`https://graph.facebook.com/v19.0/${containerId}?fields=status_code,status&access_token=${token}`);
       const statusData = await statusRes.json();
       const statusCode = statusData.status_code;
 
-      console.log(`⏳ [Attempt ${attempt}/${maxAttempts}] Carousel container ${containerId} status: ${statusCode || 'UNKNOWN'}`);
+      console.log(`⏳ [Attempt ${attempt}/${maxAttempts}] Carousel container ${containerId} status: ${statusCode || 'IN_PROGRESS'}`);
 
-      if (statusCode === 'FINISHED' || !statusCode) {
+      if (statusCode === 'FINISHED') {
         console.log(`🚀 Publishing Carousel Container ${containerId}...`);
 
         // Rate-limit resilient publish loop
         let publishAttempts = 0;
-        while (publishAttempts < 3) {
+        while (publishAttempts < 5) {
           publishAttempts++;
           const publishRes = await fetch(`https://graph.facebook.com/v19.0/${igUserId}/media_publish`, {
             method: 'POST',
@@ -118,9 +120,9 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
           if (publishData.error) {
             const errCode = publishData.error.code;
             const subCode = publishData.error.error_subcode;
-            if ((errCode === 4 || subCode === 2207051) && publishAttempts < 3) {
-              console.warn(`⚠️ Meta API Rate Limit hit (Code ${errCode}/Subcode ${subCode}). Waiting 45 seconds before retry ${publishAttempts}/3...`);
-              await new Promise(r => setTimeout(r, 45000));
+            if ((errCode === 4 || subCode === 2207051 || subCode === 2207085) && publishAttempts < 5) {
+              console.warn(`⚠️ Meta API Processing/Rate Limit (Code ${errCode}/Subcode ${subCode}). Waiting 25 seconds before retry ${publishAttempts}/5...`);
+              await new Promise(r => setTimeout(r, 25000));
               continue;
             }
             throw new Error(`Instagram Carousel Publish Error: ${JSON.stringify(publishData.error)}`);
@@ -140,6 +142,8 @@ export async function uploadCarouselToInstagram(localImagePaths, caption, slides
       }
       console.warn(`⚠️ Temporary error checking carousel status: ${err.message}. Retrying...`);
     }
+
+    await new Promise(res => setTimeout(res, 8000));
   }
 
   throw new Error(`Meta Carousel processing timed out after 2 minutes for container ${containerId}.`);

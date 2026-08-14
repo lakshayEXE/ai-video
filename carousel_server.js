@@ -7,6 +7,7 @@ import path from 'path';
 import { getLatestNewsTopic } from './src/rss.js';
 import { generateCarouselContent } from './src/carousel_prompt.js';
 import { renderCarouselSlides } from './src/carousel_renderer.js';
+import { uploadCarouselToInstagram } from './src/social/instagram_carousel.js';
 import { Telegraf } from 'telegraf';
 
 const botToken = process.env.TELEGRAM_BOT_TOKEN;
@@ -43,7 +44,7 @@ async function runCarouselPipeline() {
     const slidePaths = await renderCarouselSlides(carouselData.slides, outputDir);
 
     const categoryTag = newsTopic.category || 'EXECUTIVE BREAKDOWN';
-    const caption = `💡 [${categoryTag}] ${newsTopic.title}\n\nSwipe left to read the full step-by-step masterclass! Save this post to reference when building.\n\nComment 'GROWTH' below and I'll send you our complete resource template for free!\n\n#hustlemaxxing #business #growth #tech #startups #productivity #ai`;
+    const caption = `💡 [${categoryTag}] ${newsTopic.title}\n\nSwipe left to read the full step-by-step masterclass! Save this post to reference when building.\n\nComment 'GROWTH' below and I'll send you our complete resource template for free!\n\n#aimaxxing #ai #technology #solopreneur #tech #startups #productivity`;
 
     let instagramSuccess = false;
     let instagramError = '';
