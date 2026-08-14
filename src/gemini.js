@@ -39,35 +39,33 @@ export async function evaluateTopicVirality(newsTopicInput) {
   const title = typeof newsTopicInput === 'object' ? newsTopicInput.title : newsTopicInput;
   const snippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : title;
 
-  console.log(`🌐 Agent 0: Running Live Search Grounding on AI creator trends for topic: "${title}"...`);
+  console.log(`📊 Agent 0: Evaluating virality & trend relevance for topic: "${title}"...`);
 
   let response;
   try {
     response = await callGeminiWithRetry(
       `You are the Head of Virality & Audience Intelligence at (@hustle.maxxing).
-Search the live web for what top AI creators, tech news outlets, and X/Twitter builders are saying about this topic right now.
-Rate this topic out of 10 based on its live viral potential for an American AI, Tech, SaaS, and Solopreneur audience on Instagram Reels / TikTok.
+Analyze this tech/business news topic and rate its viral potential out of 10 for an American AI, Tech, SaaS, and Solopreneur audience on Instagram Reels / TikTok.
 
 TOPIC: "${title}"
 CONTEXT: "${snippet}"
 
 EVALUATION CRITERIA:
-1. High-Stakes Relevance (OpenAI, Claude, DeepSeek, AI Agents, Big Tech, Meme Culture, Wealth).
-2. Real-Time Creator Buzz & Shock Value.
+1. High-Stakes Relevance (OpenAI, Claude, DeepSeek, AI Agents, Big Tech, Wealth, Productivity).
+2. Audience Curiosity & Shock Value.
 3. Actionable or High-FOMO Angle.
 
 FORMAT INSTRUCTIONS:
 Return a JSON object ONLY in this schema:
 {
   "score": 9,
-  "reason": "Top AI creators on Twitter and YouTube are currently buzzing about this release."
+  "reason": "High FOMO technical paradigm shift for tech founders."
 }`,
       'gemini-2.5-flash',
-      4,
-      { tools: [{ googleSearch: {} }] }
+      3
     );
   } catch (err) {
-    console.warn('⚠️ Agent 0 Live Search Grounding fallback applied:', err.message);
+    console.warn('⚠️ Agent 0 Virality Auditor fallback applied:', err.message);
     return { score: 8, reason: "High interest tech concept accepted via fallback." };
   }
 
