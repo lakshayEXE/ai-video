@@ -31,10 +31,16 @@ async function runCarouselPipeline() {
     let viralityResult = { score: 0, reason: '' };
     let attempts = 0;
 
+    // Determine mode: 4 times a day (hours 0, 6, 12, 18 UTC) force AI Paper breakdowns
+    const currentHour = new Date().getUTCHours();
+    const isPaperSlot = [0, 6, 12, 18].includes(currentHour);
+    const modeToUse = isPaperSlot ? 'paper' : 'mixed';
+    console.log(`📌 Topic Selection Mode for ${currentHour}:00 UTC slot: ${modeToUse.toUpperCase()} ${isPaperSlot ? '(Dedicated 4x Daily Paper Slot)' : '(General Tech & Masterclass Slot)'}`);
+
     while (attempts < 5) {
       attempts++;
       console.log(`\n🔄 Agent 0 Carousel Topic Evaluation Attempt ${attempts}/5...`);
-      newsTopic = await getLatestNewsTopic('mixed');
+      newsTopic = await getLatestNewsTopic(modeToUse);
       viralityResult = await evaluateTopicVirality(newsTopic);
 
       if (viralityResult.score >= 8) {

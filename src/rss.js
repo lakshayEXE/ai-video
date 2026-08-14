@@ -100,6 +100,29 @@ const BORING_KEYWORDS = [
 export async function getLatestNewsTopic(requestedMode = 'mixed') {
   const publishedHistory = getPublishedHistory();
 
+  if (requestedMode === 'paper') {
+    const feedUrls = RSS_VERTICALS.ai_research_papers;
+    const randomFeedUrl = feedUrls[Math.floor(Math.random() * feedUrls.length)];
+    try {
+      const feed = await parser.parseURL(randomFeedUrl);
+      if (feed.items && feed.items.length > 0) {
+        let candidateItems = feed.items.filter(item => item.title && !publishedHistory.has(item.title));
+        if (candidateItems.length === 0) candidateItems = feed.items;
+        const selectedItem = candidateItems[Math.floor(Math.random() * Math.min(candidateItems.length, 8))];
+        markTopicAsPublished(selectedItem.title);
+        return {
+          title: selectedItem.title,
+          snippet: selectedItem.contentSnippet || selectedItem.content || selectedItem.title,
+          link: selectedItem.link || 'https://arxiv.org',
+          category: 'PAPER BREAKDOWN',
+          isEvergreen: false
+        };
+      }
+    } catch (e) {
+      console.warn('⚠️ Paper RSS fetch error, using evergreen paper concept:', e.message);
+    }
+  }
+
   // Mode decision: 60% RSS, 40% Evergreen
   const useEvergreen = requestedMode === 'evergreen' || (requestedMode === 'mixed' && Math.random() < 0.40);
 
