@@ -220,29 +220,67 @@ async function runPipeline(overrideNewsTopic = null) {
     await processFinalVideo(rawVideoPaths, audioPath, cleanScript, finalVideoPath);
 
     // Step 8: Upload to Temporary File Host (needed for Instagram API public URL)
-    const publicUrl = await uploadToTmpFiles(finalVideoPath);
-
-    // Step 9: Post to Instagram
-    console.log('📤 Posting to Instagram Reels...');
-    const caption = `${topic}\n\nComment 'WEALTH' to get the free side hustle guide!\n\n#wealth #sidehustle #success #hustle`;
-    await uploadToInstagram(publicUrl, caption);
-    
-    console.log('🎉 Successfully published to Instagram!');
-    
-    if (bot && chatId) {
-      // Re-initialize bot briefly to send the final success message
-      const tempBot = new Telegraf(botToken);
-      await tempBot.telegram.sendMessage(chatId, '🎉 Successfully published to Instagram Reels!');
+    let publicUrl = '';
+    try {
+      publicUrl = await uploadToTmpFiles(finalVideoPath);
+    } catch (tmpErr) {
+      console.warn('⚠️ Tmp file upload failed:', tmpErr.message);
     }
 
-    // Exit gracefully to complete the GitHub Action
+    // Step 9: Post to Instagram with Telegram Fallback
+    const caption = `🔥 ${topic}\n\nComment 'WEALTH' for the breakdown!\n\n#ai #tech #solopreneur #wealth #hustle`;
+    let instagramSuccess = false;
+    let instagramError = '';
+
+    if (publicUrl) {
+      try {
+        console.log('📤 Posting to Instagram Reels...');
+        await uploadToInstagram(publicUrl, caption);
+        console.log('🎉 Successfully published to Instagram Reels!');
+        instagramSuccess = true;
+      } catch (igErr) {
+        instagramError = igErr.message;
+        console.warn('⚠️ Instagram API Upload Failed:', instagramError);
+      }
+    } else {
+      instagramError = 'Temporary public URL could not be generated for Meta API.';
+    }
+
+    // Step 10: Dispatch Video & Status directly to Telegram Chat
+    if (bot && chatId) {
+      const tempBot = new Telegraf(botToken);
+      if (instagramSuccess) {
+        await tempBot.telegram.sendMessage(chatId, `🎉 *Published to Instagram Reels!*\n\n📌 *Topic*: ${topic}`, { parse_mode: 'Markdown' });
+      } else {
+        await tempBot.telegram.sendMessage(
+          chatId,
+          `⚠️ *Instagram API Upload Failed*\n\nReason: \`${instagramError}\`\n\n📥 *Here is your rendered Reel video!* You can download and publish it manually:`,
+          { parse_mode: 'Markdown' }
+        );
+      }
+
+      // Send the MP4 video file directly to your phone via Telegram!
+      try {
+        console.log('📱 Sending rendered video file directly to Telegram chat...');
+        await tempBot.telegram.sendVideo(
+          chatId,
+          { source: finalVideoPath },
+          { caption: `🎬 *${topic}*\n\n${caption}`, parse_mode: 'Markdown' }
+        );
+        console.log('✅ Reel video delivered to Telegram chat!');
+      } catch (tgVideoErr) {
+        console.warn('⚠️ Telegram video file dispatch error:', tgVideoErr.message);
+      }
+    }
+
+    // Exit gracefully so GitHub Actions completes cleanly
     process.exit(0);
 
   } catch (err) {
-    console.error('❌ Pipeline Error:', err);
+    console.error('❌ Pipeline Fatal Error:', err);
     if (bot && chatId) {
-        const tempBot = new Telegraf(botToken);
-        await tempBot.telegram.sendMessage(chatId, `❌ Pipeline Error: ${err.message}`);
+      const tempBot = new Telegraf(botToken);
+      await tempBot.telegram.sendMessage(chatId, `❌ Pipeline Fatal Error: ${err.message}`);
     }
     process.exit(1);
   }
