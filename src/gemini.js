@@ -20,7 +20,7 @@ async function callGeminiWithRetry(contents, model = 'gemini-2.5-flash', retries
       return await ai.models.generateContent({ model, contents, config });
     } catch (err) {
       if (err.status === 429 || (err.message && err.message.includes('RESOURCE_EXHAUSTED'))) {
-        const waitSec = attempt * 15;
+        const waitSec = attempt * 20;
         console.warn(`⏳ Gemini Free Tier Rate Limit (429) hit on attempt ${attempt}/${retries}. Pausing ${waitSec} seconds for quota reset...`);
         await sleep(waitSec * 1000);
       } else {
@@ -149,15 +149,15 @@ Make the script sound 100% human, authentic, and organic. Eliminate all robotic 
   const draftScript = response.text.trim();
   
   // Pacing delay to respect Gemini Free Tier 15 RPM limits
-  console.log('⏱️ Free Tier Pacing: Pausing 6 seconds before Agent 2...');
-  await sleep(6000);
+  console.log('⏱️ Free Tier Pacing: Pausing 10 seconds before Agent 2...');
+  await sleep(10000);
 
   // Agent 2: AI Viral Reviewer & FOMO Maximizer Layer
   const reviewResult = await reviewAndRefineScript(draftScript, topicTitle);
 
   // Pacing delay to respect Gemini Free Tier 15 RPM limits
-  console.log('⏱️ Free Tier Pacing: Pausing 6 seconds before Agent 3...');
-  await sleep(6000);
+  console.log('⏱️ Free Tier Pacing: Pausing 10 seconds before Agent 3...');
+  await sleep(10000);
 
   // Agent 3: Visual Scene Director & Shot Sync Agent Layer
   const shotList = await generateSceneShotList(reviewResult.finalScript, topicTitle);

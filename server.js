@@ -128,16 +128,16 @@ async function runPipeline(overrideNewsTopic = null) {
           console.log(`🎯 QUALIFIED VIRAL TOPIC ACCEPTED! (Score: ${viralityResult.score}/10)`);
           break;
         } else {
-          console.log(`⚠️ Topic score ${viralityResult.score}/10 < 7. Rejecting & pausing 6s before candidate ${attempts + 1}...`);
-          await new Promise((res) => setTimeout(res, 6000));
+          console.log(`⚠️ Topic score ${viralityResult.score}/10 < 7. Rejecting & pausing 10s before candidate ${attempts + 1}...`);
+          await new Promise((res) => setTimeout(res, 10000));
         }
       }
     }
 
     const topic = news.title;
     
-    console.log('⏱️ Free Tier Pacing: Pausing 6 seconds before Agent 1 (Script Architect)...');
-    await new Promise((res) => setTimeout(res, 6000));
+    console.log('⏱️ Free Tier Pacing: Pausing 10 seconds before Agent 1 (Script Architect)...');
+    await new Promise((res) => setTimeout(res, 10000));
 
     console.log(`✍️ Step 2: Executing Autonomous 4-Agent AI Pipeline for topic: "${topic}"...`);
     const scriptOutput = await generateScript(news);
