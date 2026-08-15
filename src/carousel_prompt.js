@@ -13,8 +13,9 @@ function getAiClient() {
  * @param {object|string} newsTopicInput - News topic object or string
  * @returns {Promise<object>} Structured agency-grade carousel JSON object
  */
+import { callGeminiWithRetry } from './gemini.js';
+
 export async function generateCarouselContent(newsTopicInput) {
-  const ai = getAiClient();
   const topicTitle = typeof newsTopicInput === 'object' ? newsTopicInput.title : newsTopicInput;
   const topicCategory = (typeof newsTopicInput === 'object' && newsTopicInput.category) ? newsTopicInput.category : 'BUSINESS CASE STUDY';
   const topicSnippet = (typeof newsTopicInput === 'object' && newsTopicInput.snippet) ? newsTopicInput.snippet : topicTitle;
@@ -101,10 +102,7 @@ Required JSON Structure Example (adapt slide array length between 5 and 7 items 
   ]
 }`;
 
-  const response = await ai.models.generateContent({
-    model: 'gemini-2.5-flash',
-    contents: prompt
-  });
+  const response = await callGeminiWithRetry(prompt);
 
   let rawText = response.text.trim();
   rawText = rawText.replace(/```json/gi, '').replace(/```/g, '').trim();

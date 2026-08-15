@@ -3,32 +3,55 @@ import fs from 'fs';
 import path from 'path';
 import gTTS from 'gtts';
 
-function getAiClient() {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
+let currentKeyIndex = 0;
+
+function getApiKeys() {
+  const keysStr = process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || '';
+  const extraKey1 = process.env.GEMINI_API_KEY_1;
+  const extraKey2 = process.env.GEMINI_API_KEY_2;
+  
+  const rawKeys = keysStr.split(',').concat([extraKey1, extraKey2]).filter(Boolean).map(k => k.trim());
+  const uniqueKeys = Array.from(new Set(rawKeys));
+  
+  if (uniqueKeys.length === 0) {
     throw new Error('GEMINI_API_KEY environment variable is missing.');
   }
-  return new GoogleGenAI({ apiKey });
+  return uniqueKeys;
+}
+
+function getAiClient() {
+  const keys = getApiKeys();
+  const selectedKey = keys[currentKeyIndex % keys.length];
+  currentKeyIndex++;
+  return { ai: new GoogleGenAI({ apiKey: selectedKey }), keyCount: keys.length, activeKeyIndex: (currentKeyIndex - 1) % keys.length };
 }
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function callGeminiWithRetry(contents, model = 'gemini-2.5-flash', retries = 4, config = {}) {
-  for (let attempt = 1; attempt <= retries; attempt++) {
+  const keys = getApiKeys();
+  const maxAttempts = Math.max(retries, keys.length * 2);
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    const { ai, keyCount, activeKeyIndex } = getAiClient();
     try {
-      const ai = getAiClient();
       return await ai.models.generateContent({ model, contents, config });
     } catch (err) {
       if (err.status === 429 || (err.message && err.message.includes('RESOURCE_EXHAUSTED'))) {
-        const waitSec = attempt * 20;
-        console.warn(`⏳ Gemini Free Tier Rate Limit (429) hit on attempt ${attempt}/${retries}. Pausing ${waitSec} seconds for quota reset...`);
-        await sleep(waitSec * 1000);
+        if (keyCount > 1) {
+          console.warn(`⏳ Rate limit hit on Key ${activeKeyIndex + 1}/${keyCount}. Instantly switching to next available API Key...`);
+          await sleep(2000); // short 2s pause when switching keys
+        } else {
+          const waitSec = attempt * 20;
+          console.warn(`⏳ Gemini Free Tier Rate Limit (429) hit on attempt ${attempt}/${maxAttempts}. Pausing ${waitSec} seconds for quota reset...`);
+          await sleep(waitSec * 1000);
+        }
       } else {
         throw err;
       }
     }
   }
-  throw new Error('Gemini API free tier quota limit reached.');
+  throw new Error('Gemini API free tier quota limit reached across all keys.');
 }
 
 /**
